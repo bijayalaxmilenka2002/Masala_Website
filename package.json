@@ -3,8 +3,8 @@
   "version": "2.0.0",
   "description": "Modern, responsive website clone and redesign for Subhadarshini Spices",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node dev-server.js",
+    "serve": "node dev-server.js"
   },
   "keywords": [
     "subhadarshini",
