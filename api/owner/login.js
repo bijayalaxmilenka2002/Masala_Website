@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
     if (typeof body === 'string') body = JSON.parse(body);
 
     const { username, password } = body || {};
-    const creds = getOwnerCredentials();
+    const creds = await getOwnerCredentials();
 
     if (username === creds.username && password === creds.password) {
       const sessionToken = generateAuthToken(creds.username);

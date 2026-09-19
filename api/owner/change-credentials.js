@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
     if (typeof body === 'string') body = JSON.parse(body);
 
     const { currentPassword, newUsername, newPassword } = body || {};
-    const creds = getOwnerCredentials();
+    const creds = await getOwnerCredentials();
 
     if (currentPassword !== creds.password) {
       return res.status(400).json({ success: false, error: 'Current password is incorrect.' });
@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
       return res.status(400).json({ success: false, error: 'New password must be at least 6 characters long.' });
     }
 
-    saveOwnerCredentials(newUsername, newPassword);
+    await saveOwnerCredentials(newUsername, newPassword);
 
     return res.status(200).json({
       success: true,

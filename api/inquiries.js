@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
     });
   }
 
-  const inquiries = getInquiries();
+  const inquiries = await getInquiries();
   return res.status(200).json({
     success: true,
     count: inquiries.length,

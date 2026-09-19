@@ -41,9 +41,9 @@ module.exports = async (req, res) => {
       status: 'New'
     };
 
-    const inquiries = getInquiries();
+    const inquiries = await getInquiries();
     inquiries.unshift(newEntry);
-    saveInquiries(inquiries);
+    await saveInquiries(inquiries);
 
     console.log(`[INQUIRY RECEIVED] #${inquiryId} from ${newEntry.name}`);
 
