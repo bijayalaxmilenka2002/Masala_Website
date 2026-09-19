@@ -1,6 +1,4 @@
 {
-  "version": 2,
-  "cleanUrls": true,
   "headers": [
     {
       "source": "/assets/(.*)",
@@ -13,3 +11,4 @@
     }
   ]
 }
+
