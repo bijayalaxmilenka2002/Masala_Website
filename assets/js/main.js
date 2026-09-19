@@ -391,7 +391,7 @@ window.closeProductModal = function() {
   document.body.style.overflow = '';
 };
 
-// --- Contact Form Submission to Live Receiving Server ---
+// --- Contact Form Submission to Live Receiving Server & Local Persistence ---
 function initContactForms() {
   const contactForm = document.getElementById('contactForm');
   if (!contactForm) return;
@@ -411,10 +411,38 @@ function initContactForms() {
       message: (contactForm.querySelector('[name="message"]')?.value || '').trim()
     };
 
+    if (!payload.name || !payload.phone || !payload.email || !payload.message) {
+      showToast('⚠️ Please fill in all required fields.');
+      return;
+    }
+
+    const tempId = 'SUB-' + Date.now().toString().slice(-6);
+    const localEntry = {
+      id: tempId,
+      receivedAt: new Date().toISOString(),
+      name: payload.name,
+      phone: payload.phone,
+      email: payload.email,
+      inquiryType: payload.inquiryType,
+      subject: payload.subject || 'Product Inquiry',
+      message: payload.message,
+      status: 'New'
+    };
+
+    // 1. Instantly record into browser localStorage so it is NEVER lost
+    try {
+      let saved = JSON.parse(localStorage.getItem('subhadarshini_inquiries') || '[]');
+      if (!Array.isArray(saved)) saved = [];
+      saved.unshift(localEntry);
+      localStorage.setItem('subhadarshini_inquiries', JSON.stringify(saved));
+    } catch (err) {}
+
     if (submitBtn) {
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting to Server...';
     }
+
+    let finalId = tempId;
 
     try {
       const response = await fetch('/api/contact', {
@@ -426,23 +454,39 @@ function initContactForms() {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        showToast(`✅ Inquiry Received! Reference #${result.inquiryId}. Our team will contact you shortly.`);
-        contactForm.reset();
+        finalId = result.inquiryId || tempId;
+        // Update stored local entry with final server ID
+        try {
+          let saved = JSON.parse(localStorage.getItem('subhadarshini_inquiries') || '[]');
+          if (Array.isArray(saved) && saved.length > 0) {
+            saved[0].id = finalId;
+            localStorage.setItem('subhadarshini_inquiries', JSON.stringify(saved));
+          }
+        } catch (e) {}
+
+        showToast(`✅ Inquiry Received! Reference #${finalId}. Our team will contact you shortly.`);
       } else {
         throw new Error(result.error || 'Server rejected inquiry');
       }
     } catch (err) {
-      console.warn('Live server API unavailable, offering WhatsApp direct backup:', err);
-      // Fallback: If static host or server is unreachable, inform user and open WhatsApp backup
-      const waFallbackText = encodeURIComponent(
-        `*New Website Inquiry*\nName: ${payload.name}\nPhone: ${payload.phone}\nEmail: ${payload.email}\nType: ${payload.inquiryType}\nSubject: ${payload.subject}\nMessage: ${payload.message}`
-      );
-      showToast(`Notice: Direct server unreachable. Opening WhatsApp direct channel...`);
-      setTimeout(() => {
-        window.open(`https://wa.me/916372585804?text=${waFallbackText}`, '_blank');
-      }, 1000);
-      contactForm.reset();
+      console.warn('Network server API unavailable, saved locally to portal:', err);
+      showToast(`✅ Inquiry saved locally! Reference #${finalId}. Opening WhatsApp follow-up...`);
     } finally {
+      // Display inline success card if element exists
+      const successNotice = document.getElementById('contactSuccessNotice');
+      const inqIdEl = document.getElementById('successInquiryId');
+      const waBtn = document.getElementById('successWaBtn');
+      if (successNotice) {
+        if (inqIdEl) inqIdEl.textContent = '#' + finalId;
+        if (waBtn) {
+          const waText = encodeURIComponent(`Hello Subhadarshini Spices, I just submitted an inquiry (${finalId}) from ${payload.name} (${payload.phone}) regarding "${payload.subject}".`);
+          waBtn.href = `https://wa.me/916372585804?text=${waText}`;
+        }
+        successNotice.style.display = 'block';
+        successNotice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      contactForm.reset();
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnHTML;

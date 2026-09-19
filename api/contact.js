@@ -54,6 +54,7 @@ module.exports = async (req, res) => {
       message: 'Inquiry received successfully. Our team will contact you within 24 business hours.',
       inquiryId: inquiryId,
       timestamp: newEntry.receivedAt,
+      inquiry: newEntry,
       sync: syncResult
     });
   } catch (err) {

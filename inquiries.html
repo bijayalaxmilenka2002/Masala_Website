@@ -6,7 +6,7 @@
   <title>Subhadarshini Spices | Owner Portal</title>
   <link rel="icon" type="image/png" href="assets/images/logo/logo.png">
   <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     body {
       background: #FDFBF7;
@@ -18,11 +18,11 @@
     .admin-header {
       background: #14110E;
       color: #FFFFFF;
-      padding: 1.25rem 0;
+      padding: 1.1rem 0;
       border-bottom: 3px solid var(--primary);
     }
     .admin-container {
-      max-width: 1200px;
+      max-width: 1240px;
       margin: 2rem auto;
       padding: 0 1.5rem;
     }
@@ -35,7 +35,7 @@
     .stat-card {
       background: #FFFFFF;
       border-radius: 12px;
-      padding: 1.5rem;
+      padding: 1.35rem 1.5rem;
       box-shadow: 0 4px 15px rgba(0,0,0,0.04);
       border: 1px solid #E5E7EB;
       display: flex;
@@ -52,6 +52,7 @@
       align-items: center;
       justify-content: center;
       font-size: 1.35rem;
+      flex-shrink: 0;
     }
     .stat-val {
       font-size: 1.75rem;
@@ -60,11 +61,12 @@
       line-height: 1;
     }
     .stat-label {
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       color: #6B7280;
       font-weight: 600;
       text-transform: uppercase;
-      margin-top: 0.25rem;
+      letter-spacing: 0.04em;
+      margin-top: 0.3rem;
     }
     .table-card {
       background: #FFFFFF;
@@ -82,6 +84,53 @@
       flex-wrap: wrap;
       gap: 1rem;
     }
+    .filters-bar {
+      padding: 1rem 1.5rem;
+      background: #FAFAF9;
+      border-bottom: 1px solid #E5E7EB;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .search-input-box {
+      position: relative;
+      flex: 1;
+      min-width: 240px;
+    }
+    .search-input-box input {
+      width: 100%;
+      padding: 0.55rem 0.85rem 0.55rem 2.2rem;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    .search-input-box input:focus {
+      border-color: var(--primary);
+    }
+    .search-input-box i {
+      position: absolute;
+      left: 0.8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9CA3AF;
+      font-size: 0.85rem;
+    }
+    .filter-select {
+      padding: 0.55rem 0.85rem;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      color: #374151;
+      background: #FFFFFF;
+      outline: none;
+      cursor: pointer;
+    }
     .inquiries-table {
       width: 100%;
       border-collapse: collapse;
@@ -90,16 +139,17 @@
     .inquiries-table th {
       background: #F9FAFB;
       padding: 0.85rem 1.25rem;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: #6B7280;
       border-bottom: 1px solid #E5E7EB;
+      white-space: nowrap;
     }
     .inquiries-table td {
       padding: 1rem 1.25rem;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       border-bottom: 1px solid #F3F4F6;
       vertical-align: middle;
     }
@@ -112,18 +162,34 @@
       border-radius: 9999px;
       font-size: 0.75rem;
       font-weight: 700;
+      white-space: nowrap;
     }
     .badge-wholesale { background: #FEF3C7; color: #92400E; }
     .badge-general { background: #E0E7FF; color: #3730A3; }
     .badge-feedback { background: #D1FAE5; color: #065F46; }
     .badge-default { background: #F3F4F6; color: #374151; }
+
+    /* Status Pill / Dropdown */
+    .status-select {
+      padding: 0.25rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      outline: none;
+    }
+    .status-new { background: #FEE2E2; color: #B91C1C; border-color: #FCA5A5; }
+    .status-contacted { background: #FEF3C7; color: #B45309; border-color: #FCD34D; }
+    .status-resolved { background: #D1FAE5; color: #065F46; border-color: #6EE7B7; }
+
     .btn-action-wa {
       background: #25D366;
       color: #FFFFFF;
       padding: 0.35rem 0.75rem;
       border-radius: 6px;
       font-size: 0.8rem;
-      font-weight: 600;
+      font-weight: 700;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
@@ -132,6 +198,19 @@
     }
     .btn-action-wa:hover {
       background: #1EBE5D;
+    }
+    .btn-action-del {
+      background: none;
+      border: none;
+      color: #9CA3AF;
+      cursor: pointer;
+      padding: 0.4rem;
+      border-radius: 4px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .btn-action-del:hover {
+      color: #EF4444;
+      background: #FEE2E2;
     }
     .btn-csv {
       background: #10B981;
@@ -145,6 +224,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
+      transition: background 0.2s;
     }
     .btn-csv:hover {
       background: #059669;
@@ -201,6 +281,21 @@
     .form-field input:focus {
       border-color: var(--primary);
     }
+    .pulse-live {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: pulse 2s infinite;
+      margin-right: 4px;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
   </style>
 </head>
 <body>
@@ -211,8 +306,10 @@
       <div style="display: flex; align-items: center; gap: 1rem;">
         <img src="assets/images/logo/logo.png" alt="Subhadarshini Spices" style="height: 44px; background:#fff; padding:4px 8px; border-radius:6px;">
         <div>
-          <h4 style="margin: 0; font-size: 1.15rem; font-weight: 700;">Subhadarshini Spices • Owner Portal</h4>
-          <span style="font-size: 0.8rem; color: #9CA3AF;"><i class="fas fa-user-shield" style="color:#10B981;"></i> Authenticated Private Dashboard</span>
+          <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em;">Subhadarshini Spices • Owner Portal</h4>
+          <span style="font-size: 0.8rem; color: #9CA3AF;">
+            <span class="pulse-live"></span> Private Authenticated Dashboard
+          </span>
         </div>
       </div>
       <div style="display:flex; gap:0.6rem; align-items:center;">
@@ -240,6 +337,13 @@
         </div>
       </div>
       <div class="stat-card">
+        <div class="stat-icon" style="background:#FEE2E2; color:#B91C1C;"><i class="fas fa-bell"></i></div>
+        <div>
+          <div class="stat-val" id="newCount" style="color:#B91C1C;">0</div>
+          <div class="stat-label">New / Pending Leads</div>
+        </div>
+      </div>
+      <div class="stat-card">
         <div class="stat-icon" style="background:#E8F8EE; color:#25D366;"><i class="fas fa-store"></i></div>
         <div>
           <div class="stat-val" id="distributorCount">0</div>
@@ -250,7 +354,7 @@
         <div class="stat-icon" style="background:#FEF3C7; color:#D97706;"><i class="fas fa-shield-alt"></i></div>
         <div>
           <div class="stat-val" style="font-size:1.15rem; color:#10B981;">Active & Encrypted</div>
-          <div class="stat-label">Owner Server Security</div>
+          <div class="stat-label">Cloud Sync & Persistence</div>
         </div>
       </div>
     </div>
@@ -259,16 +363,41 @@
       <div class="table-toolbar">
         <div>
           <h5 style="margin:0; font-weight:800; font-size:1.15rem;">Customer Inquiries Ledger</h5>
-          <span style="font-size:0.82rem; color:#6B7280;">Stored in <code>data/inquiries.json</code> on your host server</span>
+          <span style="font-size:0.82rem; color:#6B7280;" id="ledgerSubtitle">Synchronized live with database</span>
         </div>
-        <div style="display:flex; gap:0.5rem;">
+        <div style="display:flex; gap:0.5rem; align-items:center;">
           <button onclick="exportToCSV()" class="btn-csv" title="Download Excel/CSV copy">
-            <i class="fas fa-file-excel"></i> Export to Excel / CSV
+            <i class="fas fa-file-excel"></i> Export to CSV
           </button>
-          <button onclick="fetchInquiries()" class="btn btn-secondary btn-sm" style="cursor:pointer;">
-            <i class="fas fa-sync-alt"></i> Refresh Leads
+          <button onclick="fetchInquiries(true)" class="btn btn-secondary btn-sm" id="refreshBtn" style="cursor:pointer;" title="Fetch latest inquiries">
+            <i class="fas fa-sync-alt" id="refreshIcon"></i> Refresh
           </button>
         </div>
+      </div>
+
+      <!-- Filters & Search Toolbar -->
+      <div class="filters-bar">
+        <div class="search-input-box">
+          <i class="fas fa-search"></i>
+          <input type="text" id="searchInput" placeholder="Search by customer name, phone, email, subject, or message..." oninput="applyFilters()">
+        </div>
+
+        <select id="typeFilter" class="filter-select" onchange="applyFilters()">
+          <option value="all">All Inquiry Types</option>
+          <option value="Distributorship Enquiry">Distributorship / Dealership</option>
+          <option value="Bulk Wholesale Purchase">Bulk Wholesale</option>
+          <option value="Retail Customer Feedback">Customer Feedback</option>
+          <option value="General">General Inquiries</option>
+        </select>
+
+        <select id="statusFilter" class="filter-select" onchange="applyFilters()">
+          <option value="all">All Statuses</option>
+          <option value="New">Status: New</option>
+          <option value="Contacted">Status: Contacted</option>
+          <option value="Resolved">Status: Resolved</option>
+        </select>
+
+        <span id="filterCount" style="font-size:0.82rem; color:#6B7280; font-weight:600; margin-left:auto;">Showing 0 of 0</span>
       </div>
 
       <div style="overflow-x:auto;">
@@ -277,16 +406,17 @@
             <tr>
               <th>Ref ID & Date</th>
               <th>Customer</th>
-              <th>Contact Numbers & Email</th>
+              <th>Contact Details</th>
               <th>Inquiry Type</th>
               <th>Subject & Message</th>
-              <th>Action</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody id="inquiriesTableBody">
             <tr>
-              <td colspan="6" style="text-align:center; padding:3rem; color:#9CA3AF;">
-                <i class="fas fa-spinner fa-spin"></i> Loading inquiries from secure server...
+              <td colspan="7" style="text-align:center; padding:3rem; color:#9CA3AF;">
+                <i class="fas fa-spinner fa-spin"></i> Loading customer inquiries...
               </td>
             </tr>
           </tbody>
@@ -299,7 +429,7 @@
   <div id="credentialsModal" class="modal-overlay">
     <div class="modal-box">
       <h3 class="modal-title"><i class="fas fa-user-lock" style="color:var(--primary); margin-right:6px;"></i> Change Owner Login</h3>
-      <p style="font-size:0.85rem; color:#6B7280; margin:0 0 1.25rem;">Update the username and password used to access this inquiries dashboard.</p>
+      <p style="font-size:0.85rem; color:#6B7280; margin:0 0 1.25rem;">Update the username and password used to access this owner dashboard.</p>
 
       <div id="credError" style="color:#B91C1C; background:#FEE2E2; padding:0.6rem 0.85rem; border-radius:6px; font-size:0.82rem; margin-bottom:1rem; display:none;"></div>
       <div id="credSuccess" style="color:#065F46; background:#D1FAE5; padding:0.6rem 0.85rem; border-radius:6px; font-size:0.82rem; margin-bottom:1rem; display:none;"></div>
@@ -312,7 +442,7 @@
 
         <div class="form-field">
           <label>New Owner Username *</label>
-          <input type="text" id="newUsername" placeholder="e.g. admin or amit_swain" required autocomplete="username">
+          <input type="text" id="newUsername" placeholder="e.g. admin or owner" required autocomplete="username">
         </div>
 
         <div class="form-field">
@@ -336,12 +466,24 @@
   </div>
 
   <script>
-    let cachedInquiries = [];
+    let allInquiries = [];
+    let isFetching = false;
 
-    async function fetchInquiries() {
-      const tbody = document.getElementById('inquiriesTableBody');
-      const totalCount = document.getElementById('totalCount');
-      const distributorCount = document.getElementById('distributorCount');
+    // Strict access control: verify token on page load
+    (function checkAuth() {
+      const token = localStorage.getItem('subha_owner_token') || sessionStorage.getItem('subha_owner_token');
+      // If no token exists, redirect to login gate immediately
+      if (!token) {
+        window.location.replace('/owner-login.html');
+      }
+    })();
+
+    async function fetchInquiries(isManual = false) {
+      if (isFetching) return;
+      isFetching = true;
+
+      const refreshIcon = document.getElementById('refreshIcon');
+      if (refreshIcon && isManual) refreshIcon.classList.add('fa-spin');
 
       try {
         const token = localStorage.getItem('subha_owner_token') || sessionStorage.getItem('subha_owner_token');
@@ -353,92 +495,260 @@
         if (res.status === 401 || res.status === 403) {
           localStorage.removeItem('subha_owner_token');
           sessionStorage.removeItem('subha_owner_token');
-          window.location.href = '/owner-login.html';
+          window.location.replace('/owner-login.html');
           return;
         }
 
-        const data = await res.json();
-
-        if (!data.success || !data.inquiries) {
-          throw new Error('Could not fetch inquiries');
+        let serverList = [];
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.inquiries)) {
+            serverList = data.inquiries;
+          }
         }
 
-        cachedInquiries = data.inquiries;
-        totalCount.textContent = cachedInquiries.length;
-        distributorCount.textContent = cachedInquiries.filter(i => 
+        // Local browser storage fallback / merge
+        let localList = [];
+        try {
+          localList = JSON.parse(localStorage.getItem('subhadarshini_inquiries') || '[]');
+          if (!Array.isArray(localList)) localList = [];
+        } catch (e) { localList = []; }
+
+        // Deduplicate and merge by ID
+        const map = new Map();
+        serverList.forEach(item => { if (item && item.id) map.set(item.id, item); });
+        localList.forEach(item => { if (item && item.id && !map.has(item.id)) map.set(item.id, item); });
+
+        allInquiries = Array.from(map.values());
+        allInquiries.sort((a, b) => new Date(b.receivedAt || 0).getTime() - new Date(a.receivedAt || 0).getTime());
+
+        // Keep local storage synchronized so refreshing NEVER loses data
+        localStorage.setItem('subhadarshini_inquiries', JSON.stringify(allInquiries));
+
+        updateStatCards();
+        applyFilters();
+
+      } catch (err) {
+        console.warn('Network API temporarily offline, using cached local inquiries:', err);
+        let localList = [];
+        try {
+          localList = JSON.parse(localStorage.getItem('subhadarshini_inquiries') || '[]');
+        } catch (e) {}
+
+        if (localList && localList.length > 0) {
+          allInquiries = localList;
+          updateStatCards();
+          applyFilters();
+        } else {
+          document.getElementById('inquiriesTableBody').innerHTML = `
+            <tr>
+              <td colspan="7" style="text-align:center; padding:2.5rem; color:#EF4444;">
+                <i class="fas fa-exclamation-triangle"></i> Failed to connect to receiving server API. Make sure the Node server is running.
+              </td>
+            </tr>
+          `;
+        }
+      } finally {
+        isFetching = false;
+        if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+      }
+    }
+
+    function updateStatCards() {
+      const totalCount = document.getElementById('totalCount');
+      const newCount = document.getElementById('newCount');
+      const distributorCount = document.getElementById('distributorCount');
+
+      if (totalCount) totalCount.textContent = allInquiries.length;
+      if (newCount) {
+        newCount.textContent = allInquiries.filter(i => (i.status || 'New').toLowerCase() === 'new').length;
+      }
+      if (distributorCount) {
+        distributorCount.textContent = allInquiries.filter(i => 
           (i.inquiryType && i.inquiryType.toLowerCase().includes('distributor')) ||
           (i.subject && i.subject.toLowerCase().includes('distributor'))
         ).length;
+      }
+    }
 
-        if (cachedInquiries.length === 0) {
-          tbody.innerHTML = `
-            <tr>
-              <td colspan="6" style="text-align:center; padding:3.5rem; color:#6B7280;">
-                <i class="fas fa-envelope-open" style="font-size:2.5rem; color:#D1D5DB; margin-bottom:0.75rem; display:block;"></i>
-                <strong>No customer inquiries logged yet.</strong><br>
-                Submit a message on the <a href="contact.html" style="color:var(--primary); font-weight:600;">Contact Us page</a> to see it appear here instantly!
-              </td>
-            </tr>
-          `;
-          return;
+    function applyFilters() {
+      const searchTerm = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+      const typeVal = document.getElementById('typeFilter')?.value || 'all';
+      const statusVal = document.getElementById('statusFilter')?.value || 'all';
+      const countEl = document.getElementById('filterCount');
+
+      const filtered = allInquiries.filter(item => {
+        // Search query match
+        const matchesSearch = !searchTerm || 
+          (item.id && item.id.toLowerCase().includes(searchTerm)) ||
+          (item.name && item.name.toLowerCase().includes(searchTerm)) ||
+          (item.phone && item.phone.includes(searchTerm)) ||
+          (item.email && item.email.toLowerCase().includes(searchTerm)) ||
+          (item.subject && item.subject.toLowerCase().includes(searchTerm)) ||
+          (item.message && item.message.toLowerCase().includes(searchTerm));
+
+        // Type match
+        let matchesType = true;
+        if (typeVal !== 'all') {
+          matchesType = (item.inquiryType || '').toLowerCase().includes(typeVal.toLowerCase());
         }
 
-        tbody.innerHTML = cachedInquiries.map(item => {
-          const dateStr = item.receivedAt ? new Date(item.receivedAt).toLocaleString('en-IN', {
-            dateStyle: 'medium',
-            timeStyle: 'short'
-          }) : 'Just now';
+        // Status match
+        let matchesStatus = true;
+        if (statusVal !== 'all') {
+          matchesStatus = (item.status || 'New').toLowerCase() === statusVal.toLowerCase();
+        }
 
-          let badgeClass = 'badge-default';
-          if (item.inquiryType && item.inquiryType.includes('Distributorship')) badgeClass = 'badge-wholesale';
-          else if (item.inquiryType && item.inquiryType.includes('Feedback')) badgeClass = 'badge-feedback';
-          else if (item.inquiryType && item.inquiryType.includes('General')) badgeClass = 'badge-general';
+        return matchesSearch && matchesType && matchesStatus;
+      });
 
-          const cleanPhone = (item.phone || '').replace(/[^0-9]/g, '');
-          const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
-          const waText = encodeURIComponent(`Hello ${item.name}, thank you for contacting Subhadarshini Spices regarding your inquiry (${item.id}). How can we assist you today?`);
+      if (countEl) {
+        countEl.textContent = `Showing ${filtered.length} of ${allInquiries.length}`;
+      }
 
-          return `
-            <tr>
-              <td>
-                <span style="font-weight:800; color:var(--primary); display:block;">#${escapeHTML(item.id)}</span>
-                <span style="font-size:0.75rem; color:#9CA3AF;">${dateStr}</span>
-              </td>
-              <td style="font-weight:700; color:#111827;">${escapeHTML(item.name || 'Anonymous')}</td>
-              <td>
-                ${item.phone ? `
-                  <a href="https://wa.me/${waPhone}?text=${waText}" target="_blank" class="contact-pill wa-link" title="Click to chat on WhatsApp">
-                    <i class="fab fa-whatsapp"></i> ${escapeHTML(item.phone)}
-                  </a>
-                ` : '<span style="color:#9CA3AF;">--</span>'}
-                ${item.email ? `
-                  <a href="mailto:${escapeHTML(item.email)}" class="contact-pill" title="Click to email" style="margin-top:4px;">
-                    <i class="fas fa-envelope"></i> ${escapeHTML(item.email)}
-                  </a>
-                ` : ''}
-              </td>
-              <td><span class="badge ${badgeClass}">${escapeHTML(item.inquiryType || 'General')}</span></td>
-              <td>
-                <div style="font-weight:600; color:#111827; margin-bottom:2px;">${escapeHTML(item.subject || 'General Inquiry')}</div>
-                <div style="font-size:0.83rem; color:#6B7280; max-width:320px; line-height:1.4;">${escapeHTML(item.message || '')}</div>
-              </td>
-              <td>
-                <a href="https://wa.me/${waPhone}?text=${waText}" target="_blank" class="btn btn-sm btn-whatsapp" style="display:inline-flex; align-items:center; gap:0.4rem; padding:0.4rem 0.75rem; font-size:0.8rem;">
-                  <i class="fab fa-whatsapp"></i> Reply
-                </a>
-              </td>
-            </tr>
-          `;
-        }).join('');
+      renderTable(filtered);
+    }
 
-      } catch (err) {
+    function renderTable(items) {
+      const tbody = document.getElementById('inquiriesTableBody');
+      if (!tbody) return;
+
+      if (items.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="6" style="text-align:center; padding:2.5rem; color:#EF4444;">
-              <i class="fas fa-exclamation-triangle"></i> Failed to connect to receiving server API. Make sure the Node server is running.
+            <td colspan="7" style="text-align:center; padding:3.5rem; color:#6B7280;">
+              <i class="fas fa-envelope-open" style="font-size:2.5rem; color:#D1D5DB; margin-bottom:0.75rem; display:block;"></i>
+              <strong>No inquiries matching your criteria.</strong><br>
+              Try clearing filters or send a test inquiry on the <a href="contact.html" style="color:var(--primary); font-weight:600;">Contact Us page</a>!
             </td>
           </tr>
         `;
+        return;
+      }
+
+      tbody.innerHTML = items.map(item => {
+        const d = item.receivedAt ? new Date(item.receivedAt) : null;
+        const dateStr = (d && !isNaN(d.getTime())) ? d.toLocaleString('en-IN', {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        }) : 'Recent';
+
+        let badgeClass = 'badge-default';
+        const inqType = item.inquiryType || 'General';
+        if (inqType.includes('Distributor') || inqType.includes('Dealership')) badgeClass = 'badge-wholesale';
+        else if (inqType.includes('Feedback')) badgeClass = 'badge-feedback';
+        else if (inqType.includes('General')) badgeClass = 'badge-general';
+
+        const curStatus = item.status || 'New';
+        let statusCss = 'status-new';
+        if (curStatus.toLowerCase() === 'contacted') statusCss = 'status-contacted';
+        else if (curStatus.toLowerCase() === 'resolved') statusCss = 'status-resolved';
+
+        const cleanPhone = (item.phone || '').replace(/[^0-9]/g, '');
+        const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+        const waText = encodeURIComponent(`Hello ${item.name}, thank you for contacting Subhadarshini Spices regarding your inquiry (${item.id}). How can we assist you today?`);
+
+        return `
+          <tr id="row-${escapeHTML(item.id)}">
+            <td>
+              <span style="font-weight:800; color:var(--primary); display:block;">#${escapeHTML(item.id)}</span>
+              <span style="font-size:0.75rem; color:#9CA3AF;">${dateStr}</span>
+            </td>
+            <td style="font-weight:700; color:#111827;">${escapeHTML(item.name || 'Anonymous')}</td>
+            <td>
+              ${item.phone ? `
+                <a href="https://wa.me/${waPhone}?text=${waText}" target="_blank" class="contact-pill wa-link" title="Click to chat on WhatsApp">
+                  <i class="fab fa-whatsapp"></i> ${escapeHTML(item.phone)}
+                </a>
+              ` : '<span style="color:#9CA3AF;">--</span>'}
+              ${item.email ? `
+                <a href="mailto:${escapeHTML(item.email)}" class="contact-pill" title="Click to email" style="margin-top:4px; font-size:0.8rem;">
+                  <i class="fas fa-envelope"></i> ${escapeHTML(item.email)}
+                </a>
+              ` : ''}
+            </td>
+            <td><span class="badge ${badgeClass}">${escapeHTML(inqType)}</span></td>
+            <td>
+              <div style="font-weight:700; color:#111827; margin-bottom:2px; font-size:0.88rem;">${escapeHTML(item.subject || 'General Inquiry')}</div>
+              <div style="font-size:0.82rem; color:#6B7280; max-width:320px; line-height:1.4;">${escapeHTML(item.message || '')}</div>
+            </td>
+            <td>
+              <select class="status-select ${statusCss}" onchange="updateInquiryStatus('${escapeHTML(item.id)}', this.value, this)">
+                <option value="New" ${curStatus === 'New' ? 'selected' : ''}>New</option>
+                <option value="Contacted" ${curStatus === 'Contacted' ? 'selected' : ''}>Contacted</option>
+                <option value="Resolved" ${curStatus === 'Resolved' ? 'selected' : ''}>Resolved</option>
+              </select>
+            </td>
+            <td>
+              <div style="display:flex; align-items:center; gap:0.4rem;">
+                <a href="https://wa.me/${waPhone}?text=${waText}" target="_blank" class="btn-action-wa" title="Reply to customer on WhatsApp">
+                  <i class="fab fa-whatsapp"></i> Reply
+                </a>
+                <button type="button" class="btn-action-del" onclick="deleteInquiry('${escapeHTML(item.id)}')" title="Delete inquiry">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function updateInquiryStatus(id, newStatus, selectEl) {
+      // Optimistically update memory and localStorage
+      allInquiries = allInquiries.map(i => {
+        if (i.id === id) return { ...i, status: newStatus };
+        return i;
+      });
+      localStorage.setItem('subhadarshini_inquiries', JSON.stringify(allInquiries));
+      updateStatCards();
+
+      // Update class
+      selectEl.className = 'status-select ' + (
+        newStatus === 'Contacted' ? 'status-contacted' :
+        newStatus === 'Resolved' ? 'status-resolved' : 'status-new'
+      );
+
+      // Send to server
+      try {
+        const token = localStorage.getItem('subha_owner_token') || sessionStorage.getItem('subha_owner_token');
+        await fetch('/api/inquiries', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+          },
+          body: JSON.stringify({ id, status: newStatus })
+        });
+      } catch (e) {
+        console.warn('Status synced locally, server offline:', e);
+      }
+    }
+
+    async function deleteInquiry(id) {
+      if (!confirm(`Are you sure you want to delete inquiry #${id}? This action cannot be undone.`)) {
+        return;
+      }
+
+      // Optimistically remove from memory and localStorage
+      allInquiries = allInquiries.filter(i => i.id !== id);
+      localStorage.setItem('subhadarshini_inquiries', JSON.stringify(allInquiries));
+      updateStatCards();
+      applyFilters();
+
+      // Send to server
+      try {
+        const token = localStorage.getItem('subha_owner_token') || sessionStorage.getItem('subha_owner_token');
+        await fetch('/api/inquiries', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+          },
+          body: JSON.stringify({ id })
+        });
+      } catch (e) {
+        console.warn('Deleted locally, server offline:', e);
       }
     }
 
@@ -452,7 +762,7 @@
       } catch (e) {}
       localStorage.removeItem('subha_owner_token');
       sessionStorage.removeItem('subha_owner_token');
-      window.location.href = '/owner-login.html';
+      window.location.replace('/owner-login.html');
     }
 
     function openCredentialsModal() {
@@ -528,20 +838,21 @@
     }
 
     function exportToCSV() {
-      if (!cachedInquiries || cachedInquiries.length === 0) {
-        alert('No inquiries to export yet.');
+      if (!allInquiries || allInquiries.length === 0) {
+        alert('No customer inquiries to export yet.');
         return;
       }
-      const headers = ['Inquiry ID', 'Date & Time', 'Customer Name', 'Phone', 'Email', 'Inquiry Type', 'Subject', 'Message'];
-      const rows = cachedInquiries.map(i => [
+      const headers = ['Inquiry ID', 'Date & Time', 'Customer Name', 'Phone', 'Email', 'Inquiry Type', 'Subject', 'Message', 'Status'];
+      const rows = allInquiries.map(i => [
         i.id,
-        i.receivedAt,
+        i.receivedAt || '',
         `"${(i.name || '').replace(/"/g, '""')}"`,
         `"${(i.phone || '').replace(/"/g, '""')}"`,
         `"${(i.email || '').replace(/"/g, '""')}"`,
         `"${(i.inquiryType || '').replace(/"/g, '""')}"`,
         `"${(i.subject || '').replace(/"/g, '""')}"`,
-        `"${(i.message || '').replace(/"/g, '""')}"`
+        `"${(i.message || '').replace(/"/g, '""')}"`,
+        `"${(i.status || 'New').replace(/"/g, '""')}"`
       ]);
 
       const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -566,7 +877,8 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       fetchInquiries();
-      setInterval(fetchInquiries, 8000);
+      // Auto-refresh every 6 seconds to live-stream incoming inquiries
+      setInterval(() => fetchInquiries(false), 6000);
     });
   </script>
 </body>

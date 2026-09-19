@@ -8,9 +8,12 @@ const INQUIRIES_FILE = path.join(DATA_DIR, 'inquiries.json');
 const CONFIG_FILE = path.join(DATA_DIR, 'admin-config.json');
 
 // Cloud sync endpoints for serverless persistence across Vercel lambdas
-const INQ_CLOUD_URL = 'https://api.restful-api.dev/objects/ff808181a09d98f701a0b90b6c2b455a';
+const INQ_INDEX_URL = 'https://api.restful-api.dev/objects/ff808181a09d98f701a0b952966745c0';
 const CREDS_CLOUD_URL = 'https://api.restful-api.dev/objects/ff808181a09d98f701a0b90bb8f9455b';
 const AUTH_SECRET = process.env.AUTH_SECRET || 'subhadarshini-spices-secure-hmac-key-2026';
+
+// Active sessions memory set (fallback)
+const activeSessions = new Set();
 
 // Ensure local fallback files exist
 try {
@@ -124,73 +127,163 @@ function parseCookies(req) {
 function isOwnerAuthenticated(req) {
   const cookies = parseCookies(req);
   const token = cookies['subha_auth_token'];
-  if (token && verifyAuthToken(token)) return true;
+  if (token && (activeSessions.has(token) || verifyAuthToken(token))) return true;
 
   const authHeader = req.headers && (req.headers['authorization'] || req.headers['Authorization']);
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const bearer = authHeader.substring(7).trim();
-    if (bearer && verifyAuthToken(bearer)) return true;
+    if (bearer && (activeSessions.has(bearer) || verifyAuthToken(bearer))) return true;
   }
   return false;
 }
 
 async function getInquiries() {
-  // 1. Try cloud store first (synced across all serverless instances)
+  const resultsMap = new Map();
+
+  // 1. Read local / tmp file entries
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3000);
-    const res = await fetch(INQ_CLOUD_URL, { signal: controller.signal });
-    clearTimeout(timeout);
-    if (res.ok) {
-      const json = await res.json();
-      if (json && json.data && Array.isArray(json.data.inquiries)) {
-        return json.data.inquiries;
+    if (fs.existsSync(INQUIRIES_FILE)) {
+      const localData = JSON.parse(fs.readFileSync(INQUIRIES_FILE, 'utf8'));
+      if (Array.isArray(localData)) {
+        for (const item of localData) {
+          if (item && item.id) resultsMap.set(item.id, item);
+        }
       }
     }
   } catch (e) {}
 
-  // 2. Fallback to local file
+  // 1b. Fallback to bundled data/inquiries.json if resultsMap is empty
+  if (resultsMap.size === 0) {
+    try {
+      const bundledPath = path.join(__dirname, '..', 'data', 'inquiries.json');
+      if (fs.existsSync(bundledPath)) {
+        const bundledData = JSON.parse(fs.readFileSync(bundledPath, 'utf8'));
+        if (Array.isArray(bundledData)) {
+          for (const item of bundledData) {
+            if (item && item.id) resultsMap.set(item.id, item);
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 2. Fetch cloud inquiries via index
   try {
-    if (fs.existsSync(INQUIRIES_FILE)) {
-      const data = JSON.parse(fs.readFileSync(INQUIRIES_FILE, 'utf8'));
-      if (Array.isArray(data)) return data;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3500);
+    const indexRes = await fetch(INQ_INDEX_URL, {
+      headers: { 'User-Agent': 'SubhadarshiniSpices/2.0' },
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+
+    if (indexRes.ok) {
+      const indexJson = await indexRes.json();
+      const idsStr = indexJson && indexJson.data && indexJson.data.ids;
+      if (idsStr && typeof idsStr === 'string') {
+        const ids = idsStr.split(',').map(s => s.trim()).filter(Boolean);
+        if (ids.length > 0) {
+          const queryParams = ids.slice(0, 30).map(id => 'id=' + encodeURIComponent(id)).join('&');
+          const fetchController = new AbortController();
+          const fetchTimeout = setTimeout(() => fetchController.abort(), 4000);
+          const multiRes = await fetch('https://api.restful-api.dev/objects?' + queryParams, {
+            signal: fetchController.signal
+          });
+          clearTimeout(fetchTimeout);
+
+          if (multiRes.ok) {
+            const multiJson = await multiRes.json();
+            if (Array.isArray(multiJson)) {
+              for (const obj of multiJson) {
+                if (obj && obj.data && obj.data.id) {
+                  resultsMap.set(obj.data.id, obj.data);
+                }
+              }
+            }
+          }
+        }
+      }
     }
   } catch (e) {}
 
-  return [];
+  // Convert map to array and sort latest first
+  const list = Array.from(resultsMap.values());
+  list.sort((a, b) => {
+    const ta = new Date(a.receivedAt || 0).getTime();
+    const tb = new Date(b.receivedAt || 0).getTime();
+    return tb - ta;
+  });
+
+  // Sync back to local file if on local or warm lambda
+  try {
+    fs.writeFileSync(INQUIRIES_FILE, JSON.stringify(list, null, 2), 'utf8');
+  } catch (e) {}
+
+  return list;
 }
 
 async function saveInquiries(inquiries) {
-  // 1. Save to local fallback file
+  // 1. Save to local fallback file immediately
   try {
     fs.writeFileSync(INQUIRIES_FILE, JSON.stringify(inquiries, null, 2), 'utf8');
   } catch (e) {}
 
-  // 2. Sync to cloud store
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-    const res = await fetch(INQ_CLOUD_URL, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'SubhadarshiniSpices/2.0'
-      },
-      body: JSON.stringify({
-        name: 'subhadarshini_spices_live_inquiries',
-        data: { inquiries: inquiries }
-      }),
-      signal: controller.signal
-    });
-    clearTimeout(timeout);
-    const text = await res.text();
-    return { ok: res.ok, status: res.status, text: text.slice(0, 100) };
-  } catch (e) {
-    return { ok: false, error: e.message };
+  // 2. Cloud sync latest entry
+  if (Array.isArray(inquiries) && inquiries.length > 0) {
+    const latest = inquiries[0];
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
+
+      // Create single object for this inquiry
+      const createRes = await fetch('https://api.restful-api.dev/objects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'SubhadarshiniSpices/2.0'
+        },
+        body: JSON.stringify({
+          name: 'subha_inq_' + latest.id,
+          data: latest
+        }),
+        signal: controller.signal
+      });
+
+      if (createRes.ok) {
+        const createdObj = await createRes.json();
+        const newCloudId = createdObj.id;
+
+        // Fetch current index to prepend new ID
+        const indexRes = await fetch(INQ_INDEX_URL, { signal: controller.signal });
+        if (indexRes.ok) {
+          const indexJson = await indexRes.json();
+          const currentIds = (indexJson && indexJson.data && indexJson.data.ids) || '';
+          const existingList = currentIds.split(',').map(s => s.trim()).filter(Boolean);
+          const updatedList = [newCloudId, ...existingList.filter(id => id !== newCloudId)].slice(0, 30);
+
+          await fetch(INQ_INDEX_URL, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: 'subhadarshini_inquiry_index',
+              data: { ids: updatedList.join(',') }
+            }),
+            signal: controller.signal
+          });
+        }
+      }
+      clearTimeout(timeout);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
   }
+
+  return { ok: true };
 }
 
 module.exports = {
+  activeSessions,
   getOwnerCredentials,
   saveOwnerCredentials,
   generateAuthToken,

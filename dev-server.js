@@ -1,15 +1,18 @@
 /**
  * Subhadarshini Spices - Dedicated Live Web & API Server
- * Built with native Node.js (zero dependencies, high performance)
+ * Built with native Node.js (zero external dependencies, ultra-fast performance)
  * Features:
- * - High-speed static asset serving with proper MIME types & caching
+ * - High-speed static asset serving with clean URLs (/about, /products, etc.)
  * - Live Contact Form Receiving API (`POST /api/contact`)
  * - Persistent JSON Inquiry Database (`data/inquiries.json`)
  * - Persistent Owner Credentials (`data/admin-config.json`)
+ * - Inquiry Status Management (`PATCH /api/inquiries`)
+ * - Inquiry Deletion (`DELETE /api/inquiries`)
  * - Owner Credential Management (`POST /api/owner/change-credentials`)
  * - STRICT SERVER-SIDE OWNER AUTHENTICATION:
  *   - Only authenticated owners can access `/inquiries.html` or `/api/inquiries`
  *   - Unauthenticated visitors are blocked and redirected to `/owner-login.html`
+ *   - Stateless HMAC token authentication survives server restarts
  */
 
 const http = require('http');
@@ -24,7 +27,7 @@ const DATA_DIR = path.join(__dirname, 'data');
 const INQUIRIES_FILE = path.join(DATA_DIR, 'inquiries.json');
 const CONFIG_FILE = path.join(DATA_DIR, 'admin-config.json');
 
-// In-Memory Active Sessions
+// In-Memory Active Sessions (plus HMAC verification)
 const activeSessions = new Set();
 
 // Ensure data directory and files exist
@@ -85,7 +88,7 @@ const MIME_TYPES = {
 
 function parseCookies(req) {
   const list = {};
-  const rc = req.headers.cookie;
+  const rc = req.headers && req.headers.cookie;
   if (!rc) return list;
   rc.split(';').forEach(cookie => {
     const parts = cookie.split('=');
@@ -129,7 +132,7 @@ function isOwnerAuthenticated(req) {
     return true;
   }
 
-  const authHeader = req.headers['authorization'];
+  const authHeader = req.headers['authorization'] || req.headers['Authorization'];
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const bearerToken = authHeader.substring(7).trim();
     if (activeSessions.has(bearerToken) || verifyAuthToken(bearerToken)) {
@@ -144,14 +147,29 @@ function sendJSON(res, statusCode, data, headers = {}) {
   res.writeHead(statusCode, {
     'Content-Type': 'application/json; charset=UTF-8',
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     ...headers
   });
   res.end(JSON.stringify(data));
 }
 
-const server = http.createServer((req, res) => {
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+      if (body.length > 1e6) {
+        req.connection.destroy();
+        reject(new Error('Payload too large'));
+      }
+    });
+    req.on('end', () => resolve(body));
+    req.on('error', reject);
+  });
+}
+
+const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   let pathname = parsedUrl.pathname;
 
@@ -159,7 +177,7 @@ const server = http.createServer((req, res) => {
   if (req.method === 'OPTIONS') {
     res.writeHead(204, {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     });
     res.end();
@@ -168,38 +186,34 @@ const server = http.createServer((req, res) => {
 
   // --- API ROUTE: Owner Login (POST /api/owner/login) ---
   if (pathname === '/api/owner/login' && req.method === 'POST') {
-    let body = '';
-    req.on('data', chunk => body += chunk.toString());
-    req.on('end', () => {
-      try {
-        const { username, password } = JSON.parse(body);
-        const currentCreds = getOwnerCredentials();
+    try {
+      const raw = await readBody(req);
+      const { username, password } = JSON.parse(raw);
+      const currentCreds = getOwnerCredentials();
 
-        if (username === currentCreds.username && password === currentCreds.password) {
-          const sessionToken = crypto.randomBytes(32).toString('hex');
-          activeSessions.add(sessionToken);
+      if (username === currentCreds.username && password === currentCreds.password) {
+        const sessionToken = generateAuthToken(currentCreds.username);
+        activeSessions.add(sessionToken);
 
-          console.log(`[AUTH SUCCESS] Owner logged in as: ${username}`);
+        console.log(`[AUTH SUCCESS] Owner logged in as: ${username}`);
 
-          const cookieHeader = `subha_auth_token=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}`;
-          return sendJSON(res, 200, {
-            success: true,
-            message: 'Authentication successful.',
-            username: currentCreds.username,
-            token: sessionToken
-          }, { 'Set-Cookie': cookieHeader });
-        } else {
-          console.warn(`[AUTH FAILED] Failed login attempt for: "${username}"`);
-          return sendJSON(res, 401, {
-            success: false,
-            error: 'Invalid Owner Username or Password.'
-          });
-        }
-      } catch (err) {
-        return sendJSON(res, 400, { success: false, error: 'Invalid login payload.' });
+        const cookieHeader = `subha_auth_token=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${14 * 24 * 60 * 60}`;
+        return sendJSON(res, 200, {
+          success: true,
+          message: 'Authentication successful.',
+          username: currentCreds.username,
+          token: sessionToken
+        }, { 'Set-Cookie': cookieHeader });
+      } else {
+        console.warn(`[AUTH FAILED] Failed login attempt for: "${username}"`);
+        return sendJSON(res, 401, {
+          success: false,
+          error: 'Invalid Owner Username or Password.'
+        });
       }
-    });
-    return;
+    } catch (err) {
+      return sendJSON(res, 400, { success: false, error: 'Invalid login payload.' });
+    }
   }
 
   // --- API ROUTE: Change Credentials (POST /api/owner/change-credentials) - PROTECTED ---
@@ -208,46 +222,42 @@ const server = http.createServer((req, res) => {
       return sendJSON(res, 401, { success: false, error: 'Access Denied: Owner login required.' });
     }
 
-    let body = '';
-    req.on('data', chunk => body += chunk.toString());
-    req.on('end', () => {
-      try {
-        const { currentPassword, newUsername, newPassword } = JSON.parse(body);
-        const currentCreds = getOwnerCredentials();
+    try {
+      const raw = await readBody(req);
+      const { currentPassword, newUsername, newPassword } = JSON.parse(raw);
+      const currentCreds = getOwnerCredentials();
 
-        if (currentPassword !== currentCreds.password) {
-          return sendJSON(res, 400, {
-            success: false,
-            error: 'Current password is incorrect. Verification failed.'
-          });
-        }
-
-        if (!newUsername || String(newUsername).trim().length < 3) {
-          return sendJSON(res, 400, {
-            success: false,
-            error: 'New username must be at least 3 characters long.'
-          });
-        }
-
-        if (!newPassword || String(newPassword).trim().length < 6) {
-          return sendJSON(res, 400, {
-            success: false,
-            error: 'New password must be at least 6 characters long.'
-          });
-        }
-
-        saveOwnerCredentials(newUsername, newPassword);
-        console.log(`[CREDENTIALS UPDATED] Owner username updated to: "${newUsername}"`);
-
-        return sendJSON(res, 200, {
-          success: true,
-          message: `Username and password successfully updated! Next login will require username "${newUsername}".`
+      if (currentPassword !== currentCreds.password) {
+        return sendJSON(res, 400, {
+          success: false,
+          error: 'Current password is incorrect. Verification failed.'
         });
-      } catch (err) {
-        return sendJSON(res, 400, { success: false, error: 'Invalid request body.' });
       }
-    });
-    return;
+
+      if (!newUsername || String(newUsername).trim().length < 3) {
+        return sendJSON(res, 400, {
+          success: false,
+          error: 'New username must be at least 3 characters long.'
+        });
+      }
+
+      if (!newPassword || String(newPassword).trim().length < 6) {
+        return sendJSON(res, 400, {
+          success: false,
+          error: 'New password must be at least 6 characters long.'
+        });
+      }
+
+      saveOwnerCredentials(newUsername, newPassword);
+      console.log(`[CREDENTIALS UPDATED] Owner username updated to: "${newUsername}"`);
+
+      return sendJSON(res, 200, {
+        success: true,
+        message: `Username and password successfully updated! Next login will require username "${newUsername}".`
+      });
+    } catch (err) {
+      return sendJSON(res, 400, { success: false, error: 'Invalid request body.' });
+    }
   }
 
   // --- API ROUTE: Owner Logout (POST /api/owner/logout) ---
@@ -263,66 +273,59 @@ const server = http.createServer((req, res) => {
 
   // --- API ROUTE: Receive Contact Inquiry (POST /api/contact) - Public ---
   if (pathname === '/api/contact' && req.method === 'POST') {
-    let body = '';
-    req.on('data', chunk => {
-      body += chunk.toString();
-      if (body.length > 1e6) req.connection.destroy();
-    });
+    try {
+      const raw = await readBody(req);
+      const data = JSON.parse(raw);
+      const { name, phone, email, subject, inquiryType, type, message } = data;
 
-    req.on('end', () => {
-      try {
-        const data = JSON.parse(body);
-        const { name, phone, email, subject, inquiryType, message } = data;
-
-        if (!name || !phone || !email || !message) {
-          return sendJSON(res, 400, {
-            success: false,
-            error: 'Missing required fields: name, phone, email, and message are required.'
-          });
-        }
-
-        const inquiryId = 'SUB-' + Date.now().toString().slice(-6);
-        const newEntry = {
-          id: inquiryId,
-          receivedAt: new Date().toISOString(),
-          name: String(name).trim(),
-          phone: String(phone).trim(),
-          email: String(email).trim(),
-          inquiryType: String(inquiryType || 'General Inquiry').trim(),
-          subject: String(subject || 'Product Inquiry').trim(),
-          message: String(message).trim(),
-          status: 'New'
-        };
-
-        let inquiries = [];
-        try {
-          const raw = fs.readFileSync(INQUIRIES_FILE, 'utf8');
-          inquiries = JSON.parse(raw);
-          if (!Array.isArray(inquiries)) inquiries = [];
-        } catch (e) {
-          inquiries = [];
-        }
-
-        inquiries.unshift(newEntry);
-        fs.writeFileSync(INQUIRIES_FILE, JSON.stringify(inquiries, null, 2), 'utf8');
-
-        console.log(`[NEW LEAD] #${inquiryId} from ${newEntry.name} (${newEntry.phone}) | ${newEntry.inquiryType}`);
-
-        return sendJSON(res, 201, {
-          success: true,
-          message: 'Inquiry received successfully.',
-          inquiryId: inquiryId,
-          timestamp: newEntry.receivedAt
+      if (!name || !phone || !email || !message) {
+        return sendJSON(res, 400, {
+          success: false,
+          error: 'Missing required fields: name, phone, email, and message are required.'
         });
-      } catch (err) {
-        return sendJSON(res, 400, { success: false, error: 'Invalid JSON payload.' });
       }
-    });
-    return;
+
+      const inquiryId = 'SUB-' + Date.now().toString().slice(-6);
+      const newEntry = {
+        id: inquiryId,
+        receivedAt: new Date().toISOString(),
+        name: String(name).trim(),
+        phone: String(phone).trim(),
+        email: String(email).trim(),
+        inquiryType: String(inquiryType || type || 'General Inquiry').trim(),
+        subject: String(subject || 'Product Inquiry').trim(),
+        message: String(message).trim(),
+        status: 'New'
+      };
+
+      let inquiries = [];
+      try {
+        const fileContent = fs.readFileSync(INQUIRIES_FILE, 'utf8');
+        inquiries = JSON.parse(fileContent);
+        if (!Array.isArray(inquiries)) inquiries = [];
+      } catch (e) {
+        inquiries = [];
+      }
+
+      inquiries.unshift(newEntry);
+      fs.writeFileSync(INQUIRIES_FILE, JSON.stringify(inquiries, null, 2), 'utf8');
+
+      console.log(`[NEW LEAD RECEIVED] #${inquiryId} from ${newEntry.name} (${newEntry.phone}) | ${newEntry.inquiryType}`);
+
+      return sendJSON(res, 201, {
+        success: true,
+        message: 'Inquiry received successfully. Our team will contact you shortly.',
+        inquiryId: inquiryId,
+        timestamp: newEntry.receivedAt,
+        inquiry: newEntry
+      });
+    } catch (err) {
+      return sendJSON(res, 400, { success: false, error: 'Invalid JSON payload.' });
+    }
   }
 
-  // --- API ROUTE: Fetch inquiries (GET /api/inquiries) - PROTECTED (Owner Only) ---
-  if (pathname === '/api/inquiries' && req.method === 'GET') {
+  // --- API ROUTE: Inquiries API (GET, PATCH, DELETE) - PROTECTED ---
+  if (pathname === '/api/inquiries') {
     if (!isOwnerAuthenticated(req)) {
       return sendJSON(res, 401, {
         success: false,
@@ -330,17 +333,75 @@ const server = http.createServer((req, res) => {
       });
     }
 
-    try {
-      const raw = fs.readFileSync(INQUIRIES_FILE, 'utf8');
-      const inquiries = JSON.parse(raw);
-      return sendJSON(res, 200, {
-        success: true,
-        count: inquiries.length,
-        inquiries: inquiries
-      });
-    } catch (err) {
-      return sendJSON(res, 500, { success: false, error: 'Could not read inquiries.' });
+    // GET: Fetch all inquiries
+    if (req.method === 'GET') {
+      try {
+        const raw = fs.readFileSync(INQUIRIES_FILE, 'utf8');
+        const inquiries = JSON.parse(raw);
+        return sendJSON(res, 200, {
+          success: true,
+          count: inquiries.length,
+          inquiries: inquiries
+        });
+      } catch (err) {
+        return sendJSON(res, 500, { success: false, error: 'Could not read inquiries.' });
+      }
     }
+
+    // PATCH: Update status
+    if (req.method === 'PATCH') {
+      try {
+        const raw = await readBody(req);
+        const { id, status } = JSON.parse(raw);
+        if (!id || !status) {
+          return sendJSON(res, 400, { success: false, error: 'Inquiry ID and new status required.' });
+        }
+
+        let inquiries = JSON.parse(fs.readFileSync(INQUIRIES_FILE, 'utf8'));
+        let found = false;
+        inquiries = inquiries.map(i => {
+          if (i.id === id) {
+            found = true;
+            return { ...i, status: String(status).trim() };
+          }
+          return i;
+        });
+
+        if (!found) {
+          return sendJSON(res, 404, { success: false, error: 'Inquiry not found.' });
+        }
+
+        fs.writeFileSync(INQUIRIES_FILE, JSON.stringify(inquiries, null, 2), 'utf8');
+        return sendJSON(res, 200, { success: true, message: `Inquiry #${id} marked as ${status}.`, inquiries });
+      } catch (e) {
+        return sendJSON(res, 400, { success: false, error: 'Invalid update payload.' });
+      }
+    }
+
+    // DELETE: Delete an inquiry
+    if (req.method === 'DELETE') {
+      try {
+        const raw = await readBody(req);
+        const { id } = JSON.parse(raw);
+        if (!id) {
+          return sendJSON(res, 400, { success: false, error: 'Inquiry ID required.' });
+        }
+
+        let inquiries = JSON.parse(fs.readFileSync(INQUIRIES_FILE, 'utf8'));
+        const filtered = inquiries.filter(i => i.id !== id);
+
+        if (filtered.length === inquiries.length) {
+          return sendJSON(res, 404, { success: false, error: 'Inquiry not found.' });
+        }
+
+        fs.writeFileSync(INQUIRIES_FILE, JSON.stringify(filtered, null, 2), 'utf8');
+        return sendJSON(res, 200, { success: true, message: `Inquiry #${id} deleted successfully.`, count: filtered.length });
+      } catch (e) {
+        return sendJSON(res, 400, { success: false, error: 'Failed to delete inquiry.' });
+      }
+    }
+
+    return sendJSON(res, 405, { success: false, error: 'Method Not Allowed' });
   }
 
   // --- STRICT ACCESS CONTROL FOR INQUIRIES PAGE ---
@@ -352,13 +413,20 @@ const server = http.createServer((req, res) => {
     }
   }
 
-  // --- STATIC FILE SERVING ---
+  // --- STATIC FILE SERVING WITH CLEAN URL RESOLUTION ---
   if (pathname === '/' || pathname === '') {
     pathname = '/index.html';
   }
 
   const safePath = path.normalize(pathname).replace(/^(\.\.[\/\\])+/, '');
   let filePath = path.join(PUBLIC_DIR, safePath);
+
+  // Check if direct file exists, or if adding .html resolves it (clean URLs)
+  if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+    if (fs.existsSync(filePath + '.html') && fs.statSync(filePath + '.html').isFile()) {
+      filePath = filePath + '.html';
+    }
+  }
 
   fs.stat(filePath, (err, stats) => {
     if (err || !stats.isFile()) {

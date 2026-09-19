@@ -142,12 +142,33 @@
 
         </div>
 
-        <!-- Form Column -->
+          <!-- Form Column -->
         <div class="contact-form-card">
           <h3 style="font-size: 1.6rem; margin-bottom: 0.5rem; color: var(--dark-900);">Send Us a Message</h3>
-          <p style="color: var(--gray-600); margin-bottom: 2rem; font-size: 0.95rem;">
+          <p style="color: var(--gray-600); margin-bottom: 1.5rem; font-size: 0.95rem;">
             Fill out the form below and our team will get back to you within 24 business hours.
           </p>
+
+          <!-- Live Success Confirmation Notice -->
+          <div id="contactSuccessNotice" style="display:none; background: #E8F8EE; border: 1.5px solid #25D366; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.75rem; text-align: left;">
+            <div style="display:flex; align-items:flex-start; gap:0.75rem;">
+              <div style="font-size:1.5rem; color:#128C7E;"><i class="fas fa-check-circle"></i></div>
+              <div>
+                <h5 style="margin:0 0 0.25rem; font-size:1.05rem; color:#065F46; font-weight:800;">Inquiry Successfully Registered!</h5>
+                <p style="margin:0 0 0.5rem; font-size:0.88rem; color:#047857; line-height:1.5;">
+                  Your message has been assigned reference <strong id="successInquiryId">#SUB-000000</strong> and securely logged in our owner portal.
+                </p>
+                <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:0.6rem;">
+                  <a href="#" id="successWaBtn" target="_blank" class="btn btn-whatsapp btn-sm" style="font-size:0.8rem; padding:0.4rem 0.8rem;">
+                    <i class="fab fa-whatsapp"></i> Chat on WhatsApp Now
+                  </a>
+                  <button type="button" onclick="document.getElementById('contactSuccessNotice').style.display='none'" class="btn btn-secondary btn-sm" style="font-size:0.8rem; padding:0.4rem 0.8rem;">
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <form id="contactForm" name="contact" method="POST" data-netlify="true">
             <input type="hidden" name="form-name" value="contact">
