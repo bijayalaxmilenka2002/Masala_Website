@@ -169,10 +169,13 @@ async function saveInquiries(inquiries) {
   // 2. Sync to cloud store
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 3500);
-    await fetch(INQ_CLOUD_URL, {
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(INQ_CLOUD_URL, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'SubhadarshiniSpices/2.0'
+      },
       body: JSON.stringify({
         name: 'subhadarshini_spices_live_inquiries',
         data: { inquiries: inquiries }
@@ -180,7 +183,11 @@ async function saveInquiries(inquiries) {
       signal: controller.signal
     });
     clearTimeout(timeout);
-  } catch (e) {}
+    const text = await res.text();
+    return { ok: res.ok, status: res.status, text: text.slice(0, 100) };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
 }
 
 module.exports = {

@@ -45,15 +45,16 @@ module.exports = async (req, res) => {
     if (!Array.isArray(inquiries)) inquiries = [];
     inquiries = inquiries.filter(i => i && i.id && i.name);
     inquiries.unshift(newEntry);
-    await saveInquiries(inquiries);
+    const syncResult = await saveInquiries(inquiries);
 
-    console.log(`[INQUIRY RECEIVED] #${inquiryId} from ${newEntry.name}`);
+    console.log(`[INQUIRY RECEIVED] #${inquiryId} from ${newEntry.name}`, syncResult);
 
     return res.status(201).json({
       success: true,
       message: 'Inquiry received successfully. Our team will contact you within 24 business hours.',
       inquiryId: inquiryId,
-      timestamp: newEntry.receivedAt
+      timestamp: newEntry.receivedAt,
+      sync: syncResult
     });
   } catch (err) {
     return res.status(400).json({ success: false, error: 'Invalid JSON payload.' });
