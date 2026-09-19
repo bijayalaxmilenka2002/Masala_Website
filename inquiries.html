@@ -344,9 +344,15 @@
       const distributorCount = document.getElementById('distributorCount');
 
       try {
-        const res = await fetch('/api/inquiries');
+        const token = localStorage.getItem('subha_owner_token') || sessionStorage.getItem('subha_owner_token');
+        const headers = {};
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+
+        const res = await fetch('/api/inquiries', { headers });
 
         if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('subha_owner_token');
+          sessionStorage.removeItem('subha_owner_token');
           window.location.href = '/owner-login.html';
           return;
         }
@@ -398,24 +404,26 @@
                 <span style="font-weight:800; color:var(--primary); display:block;">#${escapeHTML(item.id)}</span>
                 <span style="font-size:0.75rem; color:#9CA3AF;">${dateStr}</span>
               </td>
+              <td style="font-weight:700; color:#111827;">${escapeHTML(item.name || 'Anonymous')}</td>
               <td>
-                <strong style="color:#111827; display:block;">${escapeHTML(item.name)}</strong>
-                <span class="badge-inq ${badgeClass}">${escapeHTML(item.inquiryType || 'General')}</span>
+                ${item.phone ? `
+                  <a href="https://wa.me/${waPhone}?text=${waText}" target="_blank" class="contact-pill wa-link" title="Click to chat on WhatsApp">
+                    <i class="fab fa-whatsapp"></i> ${escapeHTML(item.phone)}
+                  </a>
+                ` : '<span style="color:#9CA3AF;">--</span>'}
+                ${item.email ? `
+                  <a href="mailto:${escapeHTML(item.email)}" class="contact-pill" title="Click to email" style="margin-top:4px;">
+                    <i class="fas fa-envelope"></i> ${escapeHTML(item.email)}
+                  </a>
+                ` : ''}
+              </td>
+              <td><span class="badge ${badgeClass}">${escapeHTML(item.inquiryType || 'General')}</span></td>
+              <td>
+                <div style="font-weight:600; color:#111827; margin-bottom:2px;">${escapeHTML(item.subject || 'General Inquiry')}</div>
+                <div style="font-size:0.83rem; color:#6B7280; max-width:320px; line-height:1.4;">${escapeHTML(item.message || '')}</div>
               </td>
               <td>
-                <div style="font-size:0.85rem;"><i class="fas fa-phone fa-xs" style="color:#10B981; margin-right:4px;"></i> <a href="tel:${escapeHTML(item.phone)}" style="color:#374151; font-weight:600;">${escapeHTML(item.phone)}</a></div>
-                <div style="font-size:0.82rem; color:#6B7280;"><i class="fas fa-envelope fa-xs" style="color:#6366F1; margin-right:4px;"></i> <a href="mailto:${escapeHTML(item.email)}" style="color:#6B7280;">${escapeHTML(item.email)}</a></div>
-              </td>
-              <td>
-                <span style="font-weight:600; color:#4B5563;">${escapeHTML(item.subject || 'N/A')}</span>
-              </td>
-              <td style="max-width:320px;">
-                <p style="margin:0; font-size:0.85rem; color:#4B5563; line-height:1.4; word-break:break-word;">
-                  ${escapeHTML(item.message || '')}
-                </p>
-              </td>
-              <td>
-                <a href="https://wa.me/${waPhone}?text=${waText}" target="_blank" class="btn-action-wa" title="Reply to customer on WhatsApp">
+                <a href="https://wa.me/${waPhone}?text=${waText}" target="_blank" class="btn btn-sm btn-whatsapp" style="display:inline-flex; align-items:center; gap:0.4rem; padding:0.4rem 0.75rem; font-size:0.8rem;">
                   <i class="fab fa-whatsapp"></i> Reply
                 </a>
               </td>
@@ -424,7 +432,6 @@
         }).join('');
 
       } catch (err) {
-        console.error(err);
         tbody.innerHTML = `
           <tr>
             <td colspan="6" style="text-align:center; padding:2.5rem; color:#EF4444;">
@@ -437,8 +444,14 @@
 
     async function handleLogout() {
       try {
-        await fetch('/api/owner/logout', { method: 'POST' });
+        const token = localStorage.getItem('subha_owner_token') || sessionStorage.getItem('subha_owner_token');
+        await fetch('/api/owner/logout', {
+          method: 'POST',
+          headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+        });
       } catch (e) {}
+      localStorage.removeItem('subha_owner_token');
+      sessionStorage.removeItem('subha_owner_token');
       window.location.href = '/owner-login.html';
     }
 
@@ -478,9 +491,13 @@
       submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
       try {
+        const token = localStorage.getItem('subha_owner_token') || sessionStorage.getItem('subha_owner_token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+
         const res = await fetch('/api/owner/change-credentials', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: headers,
           body: JSON.stringify({
             currentPassword: currentPass,
             newUsername: newUsername,

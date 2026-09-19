@@ -94,17 +94,45 @@ function parseCookies(req) {
   return list;
 }
 
+const AUTH_SECRET = process.env.AUTH_SECRET || 'subhadarshini-spices-secure-hmac-key-2026';
+
+function generateAuthToken(username) {
+  const payload = JSON.stringify({
+    u: username,
+    exp: Date.now() + 14 * 24 * 60 * 60 * 1000
+  });
+  const b64 = Buffer.from(payload).toString('base64url');
+  const signature = crypto.createHmac('sha256', AUTH_SECRET).update(b64).digest('base64url');
+  return `${b64}.${signature}`;
+}
+
+function verifyAuthToken(token) {
+  if (!token || typeof token !== 'string') return false;
+  const parts = token.split('.');
+  if (parts.length !== 2) return false;
+  const [b64, signature] = parts;
+  try {
+    const expected = crypto.createHmac('sha256', AUTH_SECRET).update(b64).digest('base64url');
+    if (signature !== expected) return false;
+    const payload = JSON.parse(Buffer.from(b64, 'base64url').toString('utf8'));
+    if (payload && payload.exp && payload.exp > Date.now()) {
+      return payload;
+    }
+  } catch (e) {}
+  return false;
+}
+
 function isOwnerAuthenticated(req) {
   const cookies = parseCookies(req);
   const tokenFromCookie = cookies['subha_auth_token'];
-  if (tokenFromCookie && activeSessions.has(tokenFromCookie)) {
+  if (tokenFromCookie && (activeSessions.has(tokenFromCookie) || verifyAuthToken(tokenFromCookie))) {
     return true;
   }
 
   const authHeader = req.headers['authorization'];
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const bearerToken = authHeader.substring(7).trim();
-    if (activeSessions.has(bearerToken)) {
+    if (activeSessions.has(bearerToken) || verifyAuthToken(bearerToken)) {
       return true;
     }
   }

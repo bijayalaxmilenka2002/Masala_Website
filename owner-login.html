@@ -175,6 +175,10 @@
         const data = await res.json();
 
         if (res.ok && data.success) {
+          if (data.token) {
+            localStorage.setItem('subha_owner_token', data.token);
+            sessionStorage.setItem('subha_owner_token', data.token);
+          }
           // Redirect to protected inquiries page
           window.location.href = '/inquiries.html';
         } else {

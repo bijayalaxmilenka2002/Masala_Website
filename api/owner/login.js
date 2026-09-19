@@ -1,5 +1,4 @@
-const crypto = require('crypto');
-const { getOwnerCredentials, activeSessions } = require('../_config');
+const { getOwnerCredentials, generateAuthToken } = require('../_config');
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -22,10 +21,10 @@ module.exports = async (req, res) => {
     const creds = getOwnerCredentials();
 
     if (username === creds.username && password === creds.password) {
-      const sessionToken = crypto.randomBytes(32).toString('hex');
-      activeSessions.add(sessionToken);
+      const sessionToken = generateAuthToken(creds.username);
 
-      const cookieHeader = `subha_auth_token=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}`;
+      // Set cookie for browser navigation (14 days)
+      const cookieHeader = `subha_auth_token=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${14 * 24 * 60 * 60}`;
       res.setHeader('Set-Cookie', cookieHeader);
 
       return res.status(200).json({

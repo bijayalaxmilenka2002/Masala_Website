@@ -1,11 +1,15 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 // On Vercel serverless, /tmp is writable; locally, use data/
 const IS_VERCEL = !!process.env.VERCEL;
 const DATA_DIR = IS_VERCEL ? '/tmp' : path.join(__dirname, '..', 'data');
 const INQUIRIES_FILE = path.join(DATA_DIR, 'inquiries.json');
 const CONFIG_FILE = path.join(DATA_DIR, 'admin-config.json');
+
+// Secret for signing authentication tokens
+const AUTH_SECRET = process.env.AUTH_SECRET || 'subhadarshini-spices-secure-hmac-key-2026';
 
 // Ensure directory and files
 try {
@@ -22,11 +26,6 @@ try {
   console.warn('Filesystem init warning:', e.message);
 }
 
-// Global active sessions token storage
-if (!global._subhaSessions) {
-  global._subhaSessions = new Set();
-}
-
 function getOwnerCredentials() {
   try {
     if (fs.existsSync(CONFIG_FILE)) {
@@ -36,7 +35,7 @@ function getOwnerCredentials() {
       }
     }
   } catch (e) {}
-  return { username: 'admin', password: 'Subhadarshini@2026' };
+  return { username: process.env.OWNER_USER || 'admin', password: process.env.OWNER_PASS || 'Subhadarshini@2026' };
 }
 
 function saveOwnerCredentials(username, password) {
@@ -51,9 +50,35 @@ function saveOwnerCredentials(username, password) {
   return config;
 }
 
+function generateAuthToken(username) {
+  const payload = JSON.stringify({
+    u: username,
+    exp: Date.now() + 14 * 24 * 60 * 60 * 1000 // 14 days validity
+  });
+  const b64 = Buffer.from(payload).toString('base64url');
+  const signature = crypto.createHmac('sha256', AUTH_SECRET).update(b64).digest('base64url');
+  return `${b64}.${signature}`;
+}
+
+function verifyAuthToken(token) {
+  if (!token || typeof token !== 'string') return false;
+  const parts = token.split('.');
+  if (parts.length !== 2) return false;
+  const [b64, signature] = parts;
+  try {
+    const expected = crypto.createHmac('sha256', AUTH_SECRET).update(b64).digest('base64url');
+    if (signature !== expected) return false;
+    const payload = JSON.parse(Buffer.from(b64, 'base64url').toString('utf8'));
+    if (payload && payload.exp && payload.exp > Date.now()) {
+      return payload;
+    }
+  } catch (e) {}
+  return false;
+}
+
 function parseCookies(req) {
   const list = {};
-  const rc = req.headers.cookie;
+  const rc = req.headers && req.headers.cookie;
   if (!rc) return list;
   rc.split(';').forEach(cookie => {
     const parts = cookie.split('=');
@@ -63,14 +88,16 @@ function parseCookies(req) {
 }
 
 function isOwnerAuthenticated(req) {
+  // 1. Check Cookie
   const cookies = parseCookies(req);
   const token = cookies['subha_auth_token'];
-  if (token && global._subhaSessions.has(token)) return true;
+  if (token && verifyAuthToken(token)) return true;
 
-  const authHeader = req.headers['authorization'];
+  // 2. Check Authorization Header: Bearer <token>
+  const authHeader = req.headers && (req.headers['authorization'] || req.headers['Authorization']);
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const bearer = authHeader.substring(7).trim();
-    if (global._subhaSessions.has(bearer)) return true;
+    if (bearer && verifyAuthToken(bearer)) return true;
   }
   return false;
 }
@@ -94,8 +121,9 @@ function saveInquiries(inquiries) {
 module.exports = {
   getOwnerCredentials,
   saveOwnerCredentials,
+  generateAuthToken,
+  verifyAuthToken,
   isOwnerAuthenticated,
   getInquiries,
-  saveInquiries,
-  activeSessions: global._subhaSessions
+  saveInquiries
 };
