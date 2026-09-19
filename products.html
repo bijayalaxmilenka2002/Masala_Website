@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Spices Catalog | Subhadarshini Spices</title>
+  <meta name="description" content="Browse our complete collection of 35+ pure ground, blended, and whole spices. Sourced direct from farms and milled in our 10-ton daily capacity unit in Odisha.">
+  
+  <link rel="icon" type="image/png" href="assets/images/logo/logo.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- Top Info Bar -->
+  <div class="top-bar">
+    <div class="container">
+      <div class="top-bar-left">
+        <a href="tel:+916372585804"><i class="fas fa-phone-alt"></i> +91 6372585804</a>
+        <a href="mailto:care@subhadarshini.com"><i class="fas fa-envelope"></i> care@subhadarshini.com</a>
+      </div>
+      <div class="top-bar-right">
+        <span><i class="fas fa-shield-alt"></i> 100% Contamination-Free Tested Batches</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo-link">
+        <img src="assets/images/logo/logo.png" alt="Subhadarshini Spices" class="logo-img">
+      </a>
+
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="about.html" class="nav-link">About Us</a>
+        <a href="products.html" class="nav-link active">Our Spices</a>
+        <a href="recipes.html" class="nav-link">Signature Recipes</a>
+        <a href="team.html" class="nav-link">Our Team</a>
+        <a href="gallery.html" class="nav-link">Facility & Gallery</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://wa.me/916372585804?text=Hello%20Subhadarshini%20Spices%2C%20I%20would%20like%20to%20order%20spices." target="_blank" class="btn btn-whatsapp btn-sm">
+          <i class="fab fa-whatsapp"></i> Order on WhatsApp
+        </a>
+        <button class="mobile-toggle" aria-label="Toggle navigation menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="mobile-drawer-backdrop"></div>
+  <aside class="mobile-drawer">
+    <div class="drawer-header">
+      <img src="assets/images/logo/logo.png" alt="Subhadarshini" style="height: 42px;">
+      <button class="drawer-close" aria-label="Close menu">&times;</button>
+    </div>
+    <nav class="drawer-nav">
+      <a href="index.html" class="drawer-link"><span>Home</span> <i class="fas fa-chevron-right"></i></a>
+      <a href="about.html" class="drawer-link"><span>About Us</span> <i class="fas fa-chevron-right"></i></a>
+      <a href="products.html" class="drawer-link active"><span>Our Spices</span> <i class="fas fa-chevron-right"></i></a>
+      <a href="recipes.html" class="drawer-link"><span>Signature Recipes</span> <i class="fas fa-chevron-right"></i></a>
+      <a href="team.html" class="drawer-link"><span>Our Team</span> <i class="fas fa-chevron-right"></i></a>
+      <a href="gallery.html" class="drawer-link"><span>Facility & Gallery</span> <i class="fas fa-chevron-right"></i></a>
+      <a href="contact.html" class="drawer-link"><span>Contact</span> <i class="fas fa-chevron-right"></i></a>
+    </nav>
+  </aside>
+
+  <!-- Page Banner -->
+  <section style="background: radial-gradient(circle at 50% 50%, rgba(245, 166, 35, 0.12) 0%, transparent 60%), var(--white); padding: 4rem 0 3rem; border-bottom: 1px solid var(--gray-200); text-align: center;">
+    <div class="container">
+      <span class="badge-tag gold" style="margin-bottom: 1rem;">Complete Spice Catalog</span>
+      <h1 style="font-size: 2.8rem; margin-bottom: 0.75rem;">Pure Spices for Every Palate</h1>
+      <p style="color: var(--gray-600); max-width: 650px; margin: 0 auto; font-size: 1.05rem;">
+        Discover all authentic blends, ground turmeric & chillies, whole unpolished seeds, and pantry staples processed to the highest food safety standards.
+      </p>
+    </div>
+  </section>
+
+  <!-- Main Catalog Section -->
+  <section class="section" style="padding-top: 3rem;">
+    <div class="container">
+      <!-- Category Tabs -->
+      <div class="category-tabs">
+        <button class="cat-tab-btn active" data-category="all">
+          <i class="fas fa-th-large"></i> All Spices
+        </button>
+        <button class="cat-tab-btn" data-category="blended">
+          <i class="fas fa-mortar-pestle"></i> Blended Ground
+        </button>
+        <button class="cat-tab-btn" data-category="basic">
+          <i class="fas fa-flask"></i> Basic Ground
+        </button>
+        <button class="cat-tab-btn" data-category="whole">
+          <i class="fas fa-seedling"></i> Whole Spices
+        </button>
+        <button class="cat-tab-btn" data-category="premium">
+          <i class="fas fa-gem"></i> Premium Pantry
+        </button>
+        <button class="cat-tab-btn" data-category="upcoming">
+          <i class="fas fa-clock"></i> Coming Soon
+        </button>
+      </div>
+
+      <!-- Live Search Toolbar -->
+      <div class="catalog-toolbar">
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" id="productSearchInput" placeholder="Filter by spice name (e.g. Sambar, Meat, Haldi, Hing)...">
+        </div>
+        <span class="catalog-count" id="catalogCount">Loading spices...</span>
+      </div>
+
+      <!-- Product Grid -->
+      <div class="product-grid" id="productGrid">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="assets/images/logo/logo.png" alt="Subhadarshini Spices" style="height: 52px;">
+          <p>
+            Subhadarshini Agro Pvt Ltd. Founded in 2024 with a vision to deliver pure, unadulterated spices across India, rooted in the culinary richness of Odisha.
+          </p>
+          <div class="social-links">
+            <a href="https://www.facebook.com/share/1WhNgr9c6m/" target="_blank" class="social-icon-btn"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/subhadarshini_masala?igsh=MTAzb3AzMzdiNjdhYQ==" target="_blank" class="social-icon-btn"><i class="fab fa-instagram"></i></a>
+            <a href="https://wa.me/916372585804" target="_blank" class="social-icon-btn"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h5>Quick Links</h5>
+          <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About Company</a>
+            <a href="products.html">All Spices</a>
+            <a href="recipes.html">Signature Recipes</a>
+            <a href="team.html">Our Leadership</a>
+            <a href="contact.html">Contact Us</a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h5>Categories</h5>
+          <div class="footer-links">
+            <a href="products.html?category=blended">Blended Masalas</a>
+            <a href="products.html?category=basic">Basic Powders</a>
+            <a href="products.html?category=whole">Whole Spices</a>
+            <a href="products.html?category=premium">Soya & Pantry Items</a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h5>Contact</h5>
+          <ul class="footer-contact-list">
+            <li><i class="fas fa-phone-alt"></i> <span>+91 6372585804</span></li>
+            <li><i class="fas fa-envelope"></i> <span>care@subhadarshini.com</span></li>
+            <li><i class="fas fa-industry"></i> <span>Godisahi, Cuttack, Odisha</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024–2026 Subhadarshini Agro Pvt Ltd. All Rights Reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Smartphone Sticky Quick-Action Bar -->
+  <div class="mobile-bottom-bar">
+    <div class="mobile-bottom-bar-inner">
+      <a href="tel:+916372585804" class="mobile-bar-item"><i class="fas fa-phone-alt"></i><span>Call</span></a>
+      <a href="https://wa.me/916372585804" target="_blank" class="mobile-bar-item whatsapp-item"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></a>
+      <a href="products.html" class="mobile-bar-item active"><i class="fas fa-pepper-hot"></i><span>Spices</span></a>
+      <a href="recipes.html" class="mobile-bar-item"><i class="fas fa-book-open"></i><span>Recipes</span></a>
+    </div>
+  </div>
+
+  <!-- Floating WhatsApp Chat Bubble -->
+  <a href="https://wa.me/916372585804?text=Hello%20Subhadarshini%20Spices%2C%20I%20have%20an%20enquiry%20about%20your%20products." 
+     target="_blank" 
+     class="floating-wa-bubble" 
+     aria-label="Chat directly on WhatsApp with Subhadarshini Support">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+  <!-- Quick View Modal Component -->
+  <div class="modal-backdrop" id="productModal">
+    <div class="modal-dialog">
+      <button class="modal-close-btn" onclick="closeProductModal()" aria-label="Close modal">&times;</button>
+      <div class="modal-content-grid">
+        <div class="modal-media-side">
+          <img src="" alt="" id="modalMedia">
+        </div>
+        <div class="modal-info-side">
+          <span class="modal-category" id="modalCategory">Category</span>
+          <h2 class="modal-title" id="modalTitle">Product Name</h2>
+          <div class="modal-price-box" style="display:flex; align-items:baseline; gap:0.6rem; margin:0.4rem 0 1rem;">
+            <span style="font-size:0.85rem; color:var(--gray-500); font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Selected Pack Price:</span>
+            <span id="modalPriceTag" style="font-size:1.65rem; font-weight:800; color:var(--primary);">--</span>
+            <span id="modalWeightTag" style="font-size:0.85rem; color:var(--dark-800); background:var(--light-parchment); border:1px solid var(--gray-300); padding:0.18rem 0.65rem; border-radius:var(--radius-full); font-weight:700; display:none;"></span>
+          </div>
+          <p class="modal-desc" id="modalDesc">Detailed description.</p>
+
+          <div class="modal-spec-block">
+            <h6>Health & Nutritional Benefits</h6>
+            <ul class="benefit-list" id="modalBenefits"></ul>
+          </div>
+
+          <div class="modal-spec-block">
+            <h6>Key Ingredients</h6>
+            <p style="font-size:0.88rem;color:var(--gray-600);" id="modalIngredients"></p>
+          </div>
+
+          <div class="modal-spec-block">
+            <h6>Available Pack Sizes</h6>
+            <div class="product-weights" id="modalWeights"></div>
+          </div>
+
+          <div class="modal-action-bar">
+            <a href="#" target="_blank" id="modalWhatsAppBtn" class="btn btn-whatsapp" style="flex:1;">
+              <i class="fab fa-whatsapp"></i> Enquire / Order on WhatsApp
+            </a>
+            <button class="btn btn-secondary" onclick="closeProductModal()">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/products-data.js?v=2.2"></script>
+  <script src="assets/js/main.js?v=2.2"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+[
+  {
+    "id": "SUB-283038",
+    "receivedAt": "2026-09-19T06:11:23.038Z",
+    "name": "Bijayalaxmi Lenka",
+    "phone": "96929-19081",
+    "email": "bijayalaxmilenka48@gmail.com",
+    "inquiryType": "General Inquiry",
+    "subject": "i like the products",
+    "message": "its insenly good,and it is for testing purpose",
+    "status": "New"
+  },
+  {
+    "id": "SUB-003260",
+    "receivedAt": "2026-09-19T06:06:43.260Z",
+    "name": "Test Customer (Bhubaneswar)",
+    "phone": "+91 9876543210",
+    "email": "test@subhadarshini.com",
+    "inquiryType": "Wholesale & Distributorship",
+    "subject": "Inquiry for Retail Supply in Nayapalli",
+    "message": "We want to stock Subhadarshini Sambar Masala and Haldi in our supermarket.",
+    "status": "New"
+  }
+]

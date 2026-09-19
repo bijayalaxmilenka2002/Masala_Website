@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subhadarshini Spices | Owner Portal</title>
+  <link rel="icon" type="image/png" href="assets/images/logo/logo.png">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background: #FDFBF7;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #1F2937;
+      margin: 0;
+      padding-bottom: 4rem;
+    }
+    .admin-header {
+      background: #14110E;
+      color: #FFFFFF;
+      padding: 1.25rem 0;
+      border-bottom: 3px solid var(--primary);
+    }
+    .admin-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    .stat-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: #FFFFFF;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+      border: 1px solid #E5E7EB;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+    }
+    .stat-val {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #111827;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.82rem;
+      color: #6B7280;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-top: 0.25rem;
+    }
+    .table-card {
+      background: #FFFFFF;
+      border-radius: 14px;
+      border: 1px solid #E5E7EB;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    .table-toolbar {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #F3F4F6;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .inquiries-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .inquiries-table th {
+      background: #F9FAFB;
+      padding: 0.85rem 1.25rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #6B7280;
+      border-bottom: 1px solid #E5E7EB;
+    }
+    .inquiries-table td {
+      padding: 1rem 1.25rem;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #F3F4F6;
+      vertical-align: middle;
+    }
+    .inquiries-table tr:hover {
+      background: #FDFBF7;
+    }
+    .badge-inq {
+      display: inline-block;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .badge-wholesale { background: #FEF3C7; color: #92400E; }
+    .badge-general { background: #E0E7FF; color: #3730A3; }
+    .badge-feedback { background: #D1FAE5; color: #065F46; }
+    .badge-default { background: #F3F4F6; color: #374151; }
+    .btn-action-wa {
+      background: #25D366;
+      color: #FFFFFF;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: background 0.2s;
+    }
+    .btn-action-wa:hover {
+      background: #1EBE5D;
+    }
+    .btn-csv {
+      background: #10B981;
+      color: #fff;
+      border: none;
+      padding: 0.45rem 0.9rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-csv:hover {
+      background: #059669;
+    }
+
+    /* Credentials Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 17, 14, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal-box {
+      background: #FFFFFF;
+      width: 100%;
+      max-width: 440px;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #111827;
+      margin: 0 0 0.35rem;
+    }
+    .form-field {
+      margin-bottom: 1rem;
+      text-align: left;
+    }
+    .form-field label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #374151;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.35rem;
+    }
+    .form-field input {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      box-sizing: border-box;
+      outline: none;
+    }
+    .form-field input:focus {
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="admin-container" style="margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <img src="assets/images/logo/logo.png" alt="Subhadarshini Spices" style="height: 44px; background:#fff; padding:4px 8px; border-radius:6px;">
+        <div>
+          <h4 style="margin: 0; font-size: 1.15rem; font-weight: 700;">Subhadarshini Spices • Owner Portal</h4>
+          <span style="font-size: 0.8rem; color: #9CA3AF;"><i class="fas fa-user-shield" style="color:#10B981;"></i> Authenticated Private Dashboard</span>
+        </div>
+      </div>
+      <div style="display:flex; gap:0.6rem; align-items:center;">
+        <button onclick="openCredentialsModal()" class="btn btn-secondary btn-sm" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); cursor:pointer;">
+          <i class="fas fa-key"></i> Change Password
+        </button>
+        <a href="index.html" class="btn btn-secondary btn-sm" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3);">
+          <i class="fas fa-external-link-alt"></i> View Website
+        </a>
+        <button onclick="handleLogout()" class="btn btn-secondary btn-sm" style="background: #EF4444; color: #fff; border: none; cursor:pointer;" title="Sign out of Owner Portal">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Protected Dashboard Content -->
+  <main class="admin-container">
+    <div class="stat-cards">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-inbox"></i></div>
+        <div>
+          <div class="stat-val" id="totalCount">0</div>
+          <div class="stat-label">Total Inquiries Received</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#E8F8EE; color:#25D366;"><i class="fas fa-store"></i></div>
+        <div>
+          <div class="stat-val" id="distributorCount">0</div>
+          <div class="stat-label">Distributorship Leads</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#FEF3C7; color:#D97706;"><i class="fas fa-shield-alt"></i></div>
+        <div>
+          <div class="stat-val" style="font-size:1.15rem; color:#10B981;">Active & Encrypted</div>
+          <div class="stat-label">Owner Server Security</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-toolbar">
+        <div>
+          <h5 style="margin:0; font-weight:800; font-size:1.15rem;">Customer Inquiries Ledger</h5>
+          <span style="font-size:0.82rem; color:#6B7280;">Stored in <code>data/inquiries.json</code> on your host server</span>
+        </div>
+        <div style="display:flex; gap:0.5rem;">
+          <button onclick="exportToCSV()" class="btn-csv" title="Download Excel/CSV copy">
+            <i class="fas fa-file-excel"></i> Export to Excel / CSV
+          </button>
+          <button onclick="fetchInquiries()" class="btn btn-secondary btn-sm" style="cursor:pointer;">
+            <i class="fas fa-sync-alt"></i> Refresh Leads
+          </button>
+        </div>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table class="inquiries-table">
+          <thead>
+            <tr>
+              <th>Ref ID & Date</th>
+              <th>Customer</th>
+              <th>Contact Numbers & Email</th>
+              <th>Inquiry Type</th>
+              <th>Subject & Message</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="inquiriesTableBody">
+            <tr>
+              <td colspan="6" style="text-align:center; padding:3rem; color:#9CA3AF;">
+                <i class="fas fa-spinner fa-spin"></i> Loading inquiries from secure server...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Change Credentials Modal -->
+  <div id="credentialsModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3 class="modal-title"><i class="fas fa-user-lock" style="color:var(--primary); margin-right:6px;"></i> Change Owner Login</h3>
+      <p style="font-size:0.85rem; color:#6B7280; margin:0 0 1.25rem;">Update the username and password used to access this inquiries dashboard.</p>
+
+      <div id="credError" style="color:#B91C1C; background:#FEE2E2; padding:0.6rem 0.85rem; border-radius:6px; font-size:0.82rem; margin-bottom:1rem; display:none;"></div>
+      <div id="credSuccess" style="color:#065F46; background:#D1FAE5; padding:0.6rem 0.85rem; border-radius:6px; font-size:0.82rem; margin-bottom:1rem; display:none;"></div>
+
+      <form id="changeCredsForm" onsubmit="saveNewCredentials(event)">
+        <div class="form-field">
+          <label>Current Password *</label>
+          <input type="password" id="currentPass" placeholder="Enter current password" required autocomplete="current-password">
+        </div>
+
+        <div class="form-field">
+          <label>New Owner Username *</label>
+          <input type="text" id="newUsername" placeholder="e.g. admin or amit_swain" required autocomplete="username">
+        </div>
+
+        <div class="form-field">
+          <label>New Password * (Min 6 chars)</label>
+          <input type="password" id="newPassword" placeholder="Enter new password" required autocomplete="new-password">
+        </div>
+
+        <div class="form-field">
+          <label>Confirm New Password *</label>
+          <input type="password" id="confirmPassword" placeholder="Re-enter new password" required autocomplete="new-password">
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.5rem;">
+          <button type="button" onclick="closeCredentialsModal()" class="btn btn-secondary btn-sm" style="cursor:pointer;">Cancel</button>
+          <button type="submit" id="saveCredsBtn" class="btn btn-primary btn-sm" style="cursor:pointer;">
+            <i class="fas fa-check"></i> Save New Credentials
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let cachedInquiries = [];
+
+    async function fetchInquiries() {
+      const tbody = document.getElementById('inquiriesTableBody');
+      const totalCount = document.getElementById('totalCount');
+      const distributorCount = document.getElementById('distributorCount');
+
+      try {
+        const res = await fetch('/api/inquiries');
+
+        if (res.status === 401 || res.status === 403) {
+          window.location.href = '/owner-login.html';
+          return;
+        }
+
+        const data = await res.json();
+
+        if (!data.success || !data.inquiries) {
+          throw new Error('Could not fetch inquiries');
+        }
+
+        cachedInquiries = data.inquiries;
+        totalCount.textContent = cachedInquiries.length;
+        distributorCount.textContent = cachedInquiries.filter(i => 
+          (i.inquiryType && i.inquiryType.toLowerCase().includes('distributor')) ||
+          (i.subject && i.subject.toLowerCase().includes('distributor'))
+        ).length;
+
+        if (cachedInquiries.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align:center; padding:3.5rem; color:#6B7280;">
+                <i class="fas fa-envelope-open" style="font-size:2.5rem; color:#D1D5DB; margin-bottom:0.75rem; display:block;"></i>
+                <strong>No customer inquiries logged yet.</strong><br>
+                Submit a message on the <a href="contact.html" style="color:var(--primary); font-weight:600;">Contact Us page</a> to see it appear here instantly!
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = cachedInquiries.map(item => {
+          const dateStr = item.receivedAt ? new Date(item.receivedAt).toLocaleString('en-IN', {
+            dateStyle: 'medium',
+            timeStyle: 'short'
+          }) : 'Just now';
+
+          let badgeClass = 'badge-default';
+          if (item.inquiryType && item.inquiryType.includes('Distributorship')) badgeClass = 'badge-wholesale';
+          else if (item.inquiryType && item.inquiryType.includes('Feedback')) badgeClass = 'badge-feedback';
+          else if (item.inquiryType && item.inquiryType.includes('General')) badgeClass = 'badge-general';
+
+          const cleanPhone = (item.phone || '').replace(/[^0-9]/g, '');
+          const waPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+          const waText = encodeURIComponent(`Hello ${item.name}, thank you for contacting Subhadarshini Spices regarding your inquiry (${item.id}). How can we assist you today?`);
+
+          return `
+            <tr>
+              <td>
+                <span style="font-weight:800; color:var(--primary); display:block;">#${escapeHTML(item.id)}</span>
+                <span style="font-size:0.75rem; color:#9CA3AF;">${dateStr}</span>
+              </td>
+              <td>
+                <strong style="color:#111827; display:block;">${escapeHTML(item.name)}</strong>
+                <span class="badge-inq ${badgeClass}">${escapeHTML(item.inquiryType || 'General')}</span>
+              </td>
+              <td>
+                <div style="font-size:0.85rem;"><i class="fas fa-phone fa-xs" style="color:#10B981; margin-right:4px;"></i> <a href="tel:${escapeHTML(item.phone)}" style="color:#374151; font-weight:600;">${escapeHTML(item.phone)}</a></div>
+                <div style="font-size:0.82rem; color:#6B7280;"><i class="fas fa-envelope fa-xs" style="color:#6366F1; margin-right:4px;"></i> <a href="mailto:${escapeHTML(item.email)}" style="color:#6B7280;">${escapeHTML(item.email)}</a></div>
+              </td>
+              <td>
+                <span style="font-weight:600; color:#4B5563;">${escapeHTML(item.subject || 'N/A')}</span>
+              </td>
+              <td style="max-width:320px;">
+                <p style="margin:0; font-size:0.85rem; color:#4B5563; line-height:1.4; word-break:break-word;">
+                  ${escapeHTML(item.message || '')}
+                </p>
+              </td>
+              <td>
+                <a href="https://wa.me/${waPhone}?text=${waText}" target="_blank" class="btn-action-wa" title="Reply to customer on WhatsApp">
+                  <i class="fab fa-whatsapp"></i> Reply
+                </a>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+      } catch (err) {
+        console.error(err);
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align:center; padding:2.5rem; color:#EF4444;">
+              <i class="fas fa-exclamation-triangle"></i> Failed to connect to receiving server API. Make sure the Node server is running.
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    async function handleLogout() {
+      try {
+        await fetch('/api/owner/logout', { method: 'POST' });
+      } catch (e) {}
+      window.location.href = '/owner-login.html';
+    }
+
+    function openCredentialsModal() {
+      document.getElementById('credError').style.display = 'none';
+      document.getElementById('credSuccess').style.display = 'none';
+      document.getElementById('changeCredsForm').reset();
+      document.getElementById('credentialsModal').style.display = 'flex';
+      document.getElementById('currentPass').focus();
+    }
+
+    function closeCredentialsModal() {
+      document.getElementById('credentialsModal').style.display = 'none';
+    }
+
+    async function saveNewCredentials(e) {
+      e.preventDefault();
+      const currentPass = document.getElementById('currentPass').value;
+      const newUsername = document.getElementById('newUsername').value.trim();
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      const errorDiv = document.getElementById('credError');
+      const successDiv = document.getElementById('credSuccess');
+      const submitBtn = document.getElementById('saveCredsBtn');
+
+      errorDiv.style.display = 'none';
+      successDiv.style.display = 'none';
+
+      if (newPassword !== confirmPassword) {
+        errorDiv.textContent = 'New passwords do not match. Please re-type.';
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+      try {
+        const res = await fetch('/api/owner/change-credentials', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            currentPassword: currentPass,
+            newUsername: newUsername,
+            newPassword: newPassword
+          })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          successDiv.textContent = data.message;
+          successDiv.style.display = 'block';
+          document.getElementById('changeCredsForm').reset();
+          setTimeout(() => {
+            closeCredentialsModal();
+          }, 2000);
+        } else {
+          errorDiv.textContent = data.error || 'Failed to update credentials.';
+          errorDiv.style.display = 'block';
+        }
+      } catch (err) {
+        errorDiv.textContent = 'Server communication error. Please try again.';
+        errorDiv.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-check"></i> Save New Credentials';
+      }
+    }
+
+    function exportToCSV() {
+      if (!cachedInquiries || cachedInquiries.length === 0) {
+        alert('No inquiries to export yet.');
+        return;
+      }
+      const headers = ['Inquiry ID', 'Date & Time', 'Customer Name', 'Phone', 'Email', 'Inquiry Type', 'Subject', 'Message'];
+      const rows = cachedInquiries.map(i => [
+        i.id,
+        i.receivedAt,
+        `"${(i.name || '').replace(/"/g, '""')}"`,
+        `"${(i.phone || '').replace(/"/g, '""')}"`,
+        `"${(i.email || '').replace(/"/g, '""')}"`,
+        `"${(i.inquiryType || '').replace(/"/g, '""')}"`,
+        `"${(i.subject || '').replace(/"/g, '""')}"`,
+        `"${(i.message || '').replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `subhadarshini-inquiries-${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchInquiries);
+  </script>
+</body>
+</html>

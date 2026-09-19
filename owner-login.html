@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subhadarshini Spices | Owner Portal Login</title>
+  <link rel="icon" type="image/png" href="assets/images/logo/logo.png">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background: radial-gradient(circle at top, #FDF7F2 0%, #F5EDE4 100%);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #1F2937;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      margin: 0;
+    }
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+      background: #FFFFFF;
+      border-radius: 20px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 50px rgba(20, 17, 14, 0.1);
+      border: 1px solid #EAE5DE;
+      text-align: center;
+    }
+    .brand-logo {
+      height: 52px;
+      margin-bottom: 1.25rem;
+    }
+    .login-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #111827;
+      margin: 0 0 0.4rem;
+    }
+    .login-subtitle {
+      font-size: 0.85rem;
+      color: #6B7280;
+      margin-bottom: 2rem;
+    }
+    .input-group {
+      text-align: left;
+      margin-bottom: 1.25rem;
+    }
+    .input-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #374151;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.4rem;
+      display: block;
+    }
+    .input-field {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: #1F2937;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-field:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(193, 41, 46, 0.12);
+    }
+    .btn-login {
+      width: 100%;
+      padding: 0.85rem;
+      background: var(--primary);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 1.5rem;
+    }
+    .btn-login:hover {
+      background: #A62125;
+      transform: translateY(-1px);
+    }
+    .btn-login:active {
+      transform: translateY(0);
+    }
+    .alert-error {
+      background: #FEE2E2;
+      border: 1px solid #FCA5A5;
+      color: #B91C1C;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 1.25rem;
+      display: none;
+      text-align: left;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 1.75rem;
+      font-size: 0.85rem;
+      color: #6B7280;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .back-link:hover {
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <img src="assets/images/logo/logo.png" alt="Subhadarshini Spices" class="brand-logo">
+    <h1 class="login-title">Owner Portal</h1>
+    <p class="login-subtitle">Private access for Subhadarshini Spices leadership</p>
+
+    <div id="loginError" class="alert-error">
+      <i class="fas fa-exclamation-circle"></i> Invalid Owner Username or Password.
+    </div>
+
+    <form id="ownerLoginForm" onsubmit="handleLogin(event)">
+      <div class="input-group">
+        <label class="input-label" for="username">Owner Username</label>
+        <input type="text" id="username" class="input-field" placeholder="Enter username" required autofocus autocomplete="username">
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="password">Security Password</label>
+        <input type="password" id="password" class="input-field" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" id="submitBtn" class="btn-login">
+        <i class="fas fa-lock"></i> Secure Login
+      </button>
+    </form>
+
+    <a href="index.html" class="back-link">
+      <i class="fas fa-arrow-left"></i> Return to Main Website
+    </a>
+  </div>
+
+  <script>
+    async function handleLogin(e) {
+      e.preventDefault();
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value.trim();
+      const errorDiv = document.getElementById('loginError');
+      const submitBtn = document.getElementById('submitBtn');
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+      errorDiv.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/owner/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: user, password: pass })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          // Redirect to protected inquiries page
+          window.location.href = '/inquiries.html';
+        } else {
+          errorDiv.textContent = data.error || 'Authentication failed. Please check credentials.';
+          errorDiv.style.display = 'block';
+        }
+      } catch (err) {
+        errorDiv.textContent = 'Server connection error. Please try again.';
+        errorDiv.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-lock"></i> Secure Login';
+      }
+    }
+  </script>
+</body>
+</html>
