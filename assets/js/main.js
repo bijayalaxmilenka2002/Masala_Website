@@ -406,7 +406,7 @@ function initContactForms() {
       name: (contactForm.querySelector('[name="name"]')?.value || '').trim(),
       phone: (contactForm.querySelector('[name="phone"]')?.value || '').trim(),
       email: (contactForm.querySelector('[name="email"]')?.value || '').trim(),
-      inquiryType: (contactForm.querySelector('[name="inquiryType"]')?.value || 'General Inquiry').trim(),
+      inquiryType: (contactForm.querySelector('[name="inquiryType"], [name="type"]')?.value || 'General Inquiry').trim(),
       subject: (contactForm.querySelector('[name="subject"]')?.value || '').trim(),
       message: (contactForm.querySelector('[name="message"]')?.value || '').trim()
     };

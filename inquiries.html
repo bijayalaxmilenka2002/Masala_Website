@@ -564,7 +564,10 @@
         .replace(/'/g, '&#039;');
     }
 
-    document.addEventListener('DOMContentLoaded', fetchInquiries);
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchInquiries();
+      setInterval(fetchInquiries, 8000);
+    });
   </script>
 </body>
 </html>

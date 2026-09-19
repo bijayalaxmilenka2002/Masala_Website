@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
       body = JSON.parse(body);
     }
 
-    const { name, phone, email, subject, inquiryType, message } = body || {};
+    const { name, phone, email, subject, inquiryType, type, message } = body || {};
 
     if (!name || !phone || !email || !message) {
       return res.status(400).json({
@@ -35,13 +35,15 @@ module.exports = async (req, res) => {
       name: String(name).trim(),
       phone: String(phone).trim(),
       email: String(email).trim(),
-      inquiryType: String(inquiryType || 'General Inquiry').trim(),
+      inquiryType: String(inquiryType || type || 'General Inquiry').trim(),
       subject: String(subject || 'Product Inquiry').trim(),
       message: String(message).trim(),
       status: 'New'
     };
 
-    const inquiries = await getInquiries();
+    let inquiries = await getInquiries();
+    if (!Array.isArray(inquiries)) inquiries = [];
+    inquiries = inquiries.filter(i => i && i.id && i.name);
     inquiries.unshift(newEntry);
     await saveInquiries(inquiries);
 
