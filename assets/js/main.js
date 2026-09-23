@@ -173,11 +173,9 @@ function initProductCatalog() {
             </div>
 
             <div class="product-footer">
-              <div class="product-footer-price-row">
-                <div class="card-price-col">
-                  <span class="card-price-lbl" title="${defaultVariant.weight}">Price (${defaultVariant.weight})</span>
-                  <span class="card-price-val">₹${defaultVariant.price}</span>
-                </div>
+              <div class="card-price-col">
+                <span class="card-price-lbl">Price (${defaultVariant.weight})</span>
+                <span class="card-price-val">₹${defaultVariant.price}</span>
               </div>
               <div class="product-footer-actions">
                 <button class="btn btn-secondary btn-sm btn-card-details" onclick="openProductModal('${product.id}')" title="Quick View & Details">

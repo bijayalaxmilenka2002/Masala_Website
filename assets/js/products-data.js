@@ -564,8 +564,8 @@ const PRODUCTS_DATA = [
     heatLabel: "Neutral",
     aroma: "Mild Soy",
     variants: [
-      { weight: "200g ACB", price: 48 },
-      { weight: "500g Pack", price: 110 }
+      { weight: "200g", price: 48 },
+      { weight: "500g", price: 110 }
     ],
     shortDesc: "Juicy, spongy 100% vegetarian protein powerhouse that absorbs gravies wonderfully.",
     description: "Packed with over 52% plant-based protein. Expands into tender, juicy bites that soak up curries and marinades just like meat.",
@@ -586,8 +586,8 @@ const PRODUCTS_DATA = [
     heatLabel: "Pungent Umami",
     aroma: "Intense Asafoetida",
     variants: [
-      { weight: "10g Bottle", price: 32 },
-      { weight: "25g Bottle", price: 72 }
+      { weight: "10g", price: 32 },
+      { weight: "25g", price: 72 }
     ],
     shortDesc: "Small pinch delivers enormous umami depth, aroma, and gut-soothing digestion.",
     description: "A pinch of Subhadarshini Hing creates that unmistakable gourmet Indian kitchen aroma while preventing digestive discomfort from lentils and tubers.",
@@ -608,7 +608,7 @@ const PRODUCTS_DATA = [
     heatLabel: "Wholesome",
     aroma: "Toasted Wheat",
     variants: [
-      { weight: "500g ACB", price: 45 }
+      { weight: "500g", price: 45 }
     ],
     shortDesc: "Golden cracked wheat packed with natural fiber and slow-burning energy.",
     description: "Made from premium selected durum wheat, hygienically milled into uniform grains. Perfect for wholesome breakfast porridges or savory vegetable khichdi.",
@@ -651,7 +651,7 @@ const PRODUCTS_DATA = [
     heatLabel: "Herbal Sweet-Bitter",
     aroma: "Classic Fenugreek Bouquet",
     variants: [
-      { weight: "40g Box", price: 42 }
+      { weight: "40g", price: 42 }
     ],
     shortDesc: "Sun-cured dried fenugreek leaves that impart irresistible royal restaurant fragrance.",
     description: "Crisp, dust-free dried fenugreek leaves. Gently rub between your palms over hot curries in the final minute of cooking for restaurant-style magic.",
