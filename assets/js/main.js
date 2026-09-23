@@ -172,16 +172,18 @@ function initProductCatalog() {
               </div>
             </div>
 
-            <div class="product-footer" style="margin-top:auto; padding-top:0.85rem; border-top:1px solid var(--gray-200); display:flex; justify-content:space-between; align-items:center; gap:0.5rem;">
-              <div class="card-price-col" style="display:flex; flex-direction:column; justify-content:center; flex-shrink:0; min-width:0;">
-                <span class="card-price-lbl" style="font-size:0.72rem; color:var(--gray-500); font-weight:600; line-height:1.2; margin-bottom:2px; white-space:nowrap;">Price (${defaultVariant.weight})</span>
-                <span class="card-price-val" style="display:inline-block; font-size:1.25rem; font-weight:800; color:var(--primary); line-height:1; white-space:nowrap;">₹${defaultVariant.price}</span>
+            <div class="product-footer">
+              <div class="product-footer-price-row">
+                <div class="card-price-col">
+                  <span class="card-price-lbl" title="${defaultVariant.weight}">Price (${defaultVariant.weight})</span>
+                  <span class="card-price-val">₹${defaultVariant.price}</span>
+                </div>
               </div>
-              <div class="product-footer-actions" style="display:flex; align-items:center; gap:0.35rem; flex-shrink:0;">
-                <button class="btn btn-secondary btn-sm" onclick="openProductModal('${product.id}')" title="Quick View & Details" style="padding:0.42rem 0.75rem; font-size:0.8rem; font-weight:600; gap:0.35rem; line-height:1; height:34px;">
+              <div class="product-footer-actions">
+                <button class="btn btn-secondary btn-sm btn-card-details" onclick="openProductModal('${product.id}')" title="Quick View & Details">
                   <i class="fas fa-eye"></i> Details
                 </button>
-                <a href="https://wa.me/916372585804?text=${waText}" target="_blank" class="btn btn-whatsapp btn-sm btn-card-order" title="Order on WhatsApp" style="padding:0.42rem 0.75rem; font-size:0.8rem; font-weight:600; gap:0.35rem; line-height:1; height:34px;">
+                <a href="https://wa.me/916372585804?text=${waText}" target="_blank" class="btn btn-whatsapp btn-sm btn-card-order" title="Order on WhatsApp">
                   <i class="fab fa-whatsapp"></i> Order
                 </a>
               </div>
@@ -248,6 +250,7 @@ window.selectCardVariant = function(productId, variantIndex, event) {
   }
   if (priceLbl) {
     priceLbl.textContent = `Price (${variant.weight})`;
+    priceLbl.title = `Price (${variant.weight})`;
   }
 
   // Update WhatsApp order link
