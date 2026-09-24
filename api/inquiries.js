@@ -1,4 +1,4 @@
-const { isOwnerAuthenticated, getInquiries, saveInquiries } = require('./_config');
+const { isOwnerAuthenticated, supabaseService } = require('./_config');
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -9,50 +9,60 @@ module.exports = async (req, res) => {
     return res.status(204).end();
   }
 
+  // Strict Server-Side Authentication: Only the owner can view, update or delete inquiries
   if (!isOwnerAuthenticated(req)) {
     return res.status(401).json({
       success: false,
-      error: 'Access Denied: Owner login required to view customer inquiries.'
+      error: 'Access Denied: Owner authentication required to access customer inquiries.'
     });
   }
 
-  // GET: Fetch all inquiries
+  // GET: Fetch all inquiries or check backend health
   if (req.method === 'GET') {
-    const inquiries = await getInquiries();
-    return res.status(200).json({
-      success: true,
-      count: inquiries.length,
-      inquiries: inquiries
-    });
+    try {
+      const url = new URL(req.url, 'http://localhost');
+      const action = url.searchParams.get('action');
+
+      if (action === 'health') {
+        const health = await supabaseService.checkSupabaseHealth();
+        return res.status(200).json({ success: true, health });
+      }
+
+      const result = await supabaseService.fetchInquiries();
+      return res.status(200).json({
+        success: true,
+        count: result.inquiries.length,
+        source: result.source,
+        inquiries: result.inquiries
+      });
+    } catch (err) {
+      console.error('[INQUIRIES GET ERROR]:', err);
+      return res.status(500).json({ success: false, error: 'Could not fetch inquiries from backend.' });
+    }
   }
 
-  // PATCH: Update inquiry status (e.g. 'New' -> 'Contacted' -> 'Resolved')
+  // PATCH: Update inquiry status or owner notes
   if (req.method === 'PATCH') {
     try {
       let body = req.body;
       if (typeof body === 'string') body = JSON.parse(body);
-      const { id, status } = body || {};
+      const { id, status, notes } = body || {};
 
-      if (!id || !status) {
-        return res.status(400).json({ success: false, error: 'Inquiry ID and new status are required.' });
+      if (!id) {
+        return res.status(400).json({ success: false, error: 'Inquiry ID is required for update.' });
       }
 
-      let inquiries = await getInquiries();
-      let updated = false;
-      inquiries = inquiries.map(item => {
-        if (item.id === id) {
-          updated = true;
-          return { ...item, status: String(status).trim() };
-        }
-        return item;
+      const updates = {};
+      if (status !== undefined) updates.status = String(status).trim();
+      if (notes !== undefined) updates.notes = String(notes).trim();
+
+      const updateResult = await supabaseService.updateInquiry(id, updates);
+
+      return res.status(200).json({
+        success: true,
+        message: `Inquiry #${id} updated successfully.`,
+        storage: updateResult.storage
       });
-
-      if (!updated) {
-        return res.status(404).json({ success: false, error: 'Inquiry not found.' });
-      }
-
-      await saveInquiries(inquiries);
-      return res.status(200).json({ success: true, message: `Inquiry #${id} status updated to ${status}.`, inquiries });
     } catch (e) {
       return res.status(400).json({ success: false, error: 'Invalid update payload.' });
     }
@@ -69,15 +79,12 @@ module.exports = async (req, res) => {
         return res.status(400).json({ success: false, error: 'Inquiry ID is required to delete.' });
       }
 
-      let inquiries = await getInquiries();
-      const filtered = inquiries.filter(item => item.id !== id);
+      await supabaseService.deleteInquiry(id);
 
-      if (filtered.length === inquiries.length) {
-        return res.status(404).json({ success: false, error: 'Inquiry not found.' });
-      }
-
-      await saveInquiries(filtered);
-      return res.status(200).json({ success: true, message: `Inquiry #${id} deleted successfully.`, count: filtered.length });
+      return res.status(200).json({
+        success: true,
+        message: `Inquiry #${id} permanently deleted from database.`
+      });
     } catch (e) {
       return res.status(400).json({ success: false, error: 'Failed to delete inquiry.' });
     }

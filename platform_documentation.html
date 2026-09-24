@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Subhadarshini Spices - Platform Modernization & Technical Handover Report</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+    @page {
+      size: A4 portrait;
+      margin: 11mm 12mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #1F2937;
+      background: #FFFFFF;
+      line-height: 1.42;
+      font-size: 8.5pt;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Cover / Header */
+    .doc-header {
+      border-bottom: 2.5px solid #D9531E;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 19pt;
+      font-weight: 800;
+      color: #14110E;
+      margin: 0 0 1px 0;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 8.5pt;
+      color: #D9531E;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .doc-badge {
+      background: #FEF2F2;
+      border: 1px solid #FCA5A5;
+      color: #991B1B;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 7.5pt;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Section Styling */
+    h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 11.5pt;
+      font-weight: 800;
+      color: #14110E;
+      border-left: 3.5px solid #D9531E;
+      padding-left: 8px;
+      margin: 10px 0 6px 0;
+      letter-spacing: -0.01em;
+    }
+
+    p {
+      margin: 0 0 6px 0;
+      color: #374151;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 6px 0 10px 0;
+      font-size: 8pt;
+    }
+
+    th, td {
+      padding: 5px 8px;
+      text-align: left;
+      border-bottom: 1px solid #E5E7EB;
+      vertical-align: top;
+      line-height: 1.35;
+    }
+
+    th {
+      background: #F9FAFB;
+      color: #111827;
+      font-weight: 700;
+      border-top: 1px solid #E5E7EB;
+      font-size: 7.5pt;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    tr:nth-child(even) td {
+      background: #FCFCFD;
+    }
+
+    .col-highlight {
+      background: #FFFBEB !important;
+      font-weight: 600;
+    }
+
+    /* Credentials Callout Card */
+    .creds-card {
+      background: #14110E;
+      color: #FFFFFF;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin: 8px 0 10px 0;
+      border-left: 4px solid #D9531E;
+    }
+
+    .creds-card h4 {
+      margin: 0 0 3px 0;
+      font-family: 'Outfit', sans-serif;
+      font-size: 10.5pt;
+      color: #FBBF24;
+    }
+
+    .creds-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 6px;
+      background: rgba(255,255,255,0.06);
+      padding: 8px 10px;
+      border-radius: 6px;
+    }
+
+    .cred-item {
+      font-size: 8pt;
+    }
+
+    .cred-label {
+      color: #9CA3AF;
+      font-size: 7pt;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 2px;
+    }
+
+    .cred-val {
+      font-family: monospace;
+      font-size: 9.5pt;
+      font-weight: 700;
+      color: #6EE7B7;
+    }
+
+    /* Feature Grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin: 6px 0 10px 0;
+    }
+
+    .feature-card {
+      background: #FDFBF7;
+      border: 1px solid #EAE6DF;
+      border-radius: 6px;
+      padding: 7px 9px;
+    }
+
+    .feature-card h5 {
+      margin: 0 0 2px 0;
+      font-size: 8.2pt;
+      font-weight: 700;
+      color: #D9531E;
+    }
+
+    .feature-card p {
+      margin: 0;
+      font-size: 7.2pt;
+      color: #4B5563;
+      line-height: 1.35;
+    }
+
+    /* Alert / Notice */
+    .callout-info {
+      background: #EFF6FF;
+      border: 1px solid #BFDBFE;
+      border-left: 3px solid #2563EB;
+      border-radius: 6px;
+      padding: 6px 10px;
+      margin: 6px 0;
+      font-size: 7.8pt;
+      color: #1E40AF;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 1.5px 6px;
+      border-radius: 9999px;
+      font-size: 6.8pt;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .pill-green { background: #D1FAE5; color: #065F46; }
+    .pill-red { background: #FEE2E2; color: #991B1B; }
+    .pill-orange { background: #FFEDD5; color: #9A3412; }
+
+    /* Page Breaks */
+    .page-break {
+      page-break-before: always;
+      break-before: page;
+      padding-top: 4px;
+    }
+
+    /* Footer Meta */
+    .doc-footer {
+      margin-top: 14px;
+      border-top: 1px solid #E5E7EB;
+      padding-top: 5px;
+      display: flex;
+      justify-content: space-between;
+      color: #9CA3AF;
+      font-size: 7.2pt;
+    }
+
+    a {
+      color: #D9531E;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== PAGE 1 ==================== -->
+  <div class="doc-header">
+    <div>
+      <div class="brand-subtitle">Platform Modernization & Technical Handover Report</div>
+      <h1 class="brand-title">Subhadarshini Spices</h1>
+      <p style="margin:2px 0 0 0; color:#6B7280; font-size:8pt;">Subhadarshini Agro Pvt Ltd • Bhubaneswar & Cuttack, Odisha</p>
+    </div>
+    <div style="text-align:right;">
+      <span class="doc-badge">Production Live</span>
+      <div style="font-size:7pt; color:#9CA3AF; margin-top:4px;">Document Ref: #SD-DOC-2026</div>
+    </div>
+  </div>
+
+  <h2>1. Executive Summary & Purpose</h2>
+  <p>
+    This report documents the platform upgrade completed for <strong>Subhadarshini Agro Pvt Ltd</strong>. The previous website 
+    (hosted at <code>https://www.subhadarshini.com/gallery.php</code>) was a legacy, static PHP 5.x presentation with non-responsive layouts, fixed package text, and no automated lead processing.
+  </p>
+  <p>
+    The platform has been redesigned into an <strong>E-Commerce Catalog & Real-Time Wholesale Lead Generation System</strong>, 
+    complete with 1-click WhatsApp ordering, dynamic pack pricing, and a private password-protected Owner Portal for managing customer leads.
+  </p>
+
+  <h2>2. Legacy Website vs. Modern Platform Comparison</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 20%;">Feature Area</th>
+        <th style="width: 38%;">Legacy Website (subhadarshini.com)</th>
+        <th style="width: 42%;" class="col-highlight">Modern Platform (Vercel Production)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>UI & Visual Identity</strong></td>
+        <td>Outdated layout, generic fonts, fixed-width desktop frames.</td>
+        <td class="col-highlight"><span class="pill pill-green">Modernized</span> Saffron & Paprika design system, Outfit & Plus Jakarta Sans fonts.</td>
+      </tr>
+      <tr>
+        <td><strong>Device Responsiveness</strong></td>
+        <td>Broken layout on phones; requires horizontal zooming.</td>
+        <td class="col-highlight"><span class="pill pill-green">100% Mobile First</span> Fluid grids, hamburger drawer, smartphone sticky bottom action bar.</td>
+      </tr>
+      <tr>
+        <td><strong>Pack Sizes & Pricing</strong></td>
+        <td>Static descriptive text; customers cannot see pack pricing.</td>
+        <td class="col-highlight"><span class="pill pill-green">Dynamic Engine</span> Real-time switcher (50g, 100g, 250g) with live price updates (e.g. ₹38 vs ₹72).</td>
+      </tr>
+      <tr>
+        <td><strong>Ordering Mechanism</strong></td>
+        <td>No instant ordering; required typing phone numbers manually.</td>
+        <td class="col-highlight"><span class="pill pill-green">1-Click WhatsApp</span> Direct WhatsApp order pre-filled with the exact spice name, weight, and price.</td>
+      </tr>
+      <tr>
+        <td><strong>Product Insights</strong></td>
+        <td>Limited static text.</td>
+        <td class="col-highlight"><span class="pill pill-green">Interactive Modal</span> Quick-view popup with health benefits, ingredients, and pack buttons.</td>
+      </tr>
+      <tr>
+        <td><strong>Customer Inquiries</strong></td>
+        <td>Generic non-functional form; leads frequently lost.</td>
+        <td class="col-highlight"><span class="pill pill-green">Live Pipeline</span> Assigns tracking ID (#SUB-XXXXXX) with synchronized real-time storage.</td>
+      </tr>
+      <tr>
+        <td><strong>Owner Portal / CRM</strong></td>
+        <td><span class="pill pill-red">None</span> Leadership had no dashboard to monitor inquiries.</td>
+        <td class="col-highlight"><span class="pill pill-green">Private Portal</span> Authenticated ledger with search, lead status tracker, WhatsApp reply, CSV export.</td>
+      </tr>
+      <tr>
+        <td><strong>Hosting & Speed</strong></td>
+        <td>Legacy shared web server with slow load times in India.</td>
+        <td class="col-highlight"><span class="pill pill-green">Edge CDN</span> Vercel Global Serverless Edge Network with sub-second load times.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>3. Live Production URLs & Access Matrix</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Portal Name</th>
+        <th>Public / Private</th>
+        <th>Live Destination Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Public Customer Storefront</strong></td>
+        <td><span class="pill pill-green">Public</span></td>
+        <td><a href="https://masala-website-flax.vercel.app/">https://masala-website-flax.vercel.app/</a></td>
+      </tr>
+      <tr>
+        <td><strong>Spice Catalog & Pricing</strong></td>
+        <td><span class="pill pill-green">Public</span></td>
+        <td><a href="https://masala-website-flax.vercel.app/products.html">https://masala-website-flax.vercel.app/products.html</a></td>
+      </tr>
+      <tr>
+        <td><strong>Contact & Distributorship</strong></td>
+        <td><span class="pill pill-green">Public</span></td>
+        <td><a href="https://masala-website-flax.vercel.app/contact.html">https://masala-website-flax.vercel.app/contact.html</a></td>
+      </tr>
+      <tr>
+        <td><strong>Private Owner Portal</strong></td>
+        <td><span class="pill pill-orange">Protected</span></td>
+        <td><a href="https://masala-website-flax.vercel.app/inquiries.html">https://masala-website-flax.vercel.app/inquiries.html</a></td>
+      </tr>
+      <tr>
+        <td><strong>Owner Login Gate</strong></td>
+        <td><span class="pill pill-orange">Protected</span></td>
+        <td><a href="https://masala-website-flax.vercel.app/owner-login.html">https://masala-website-flax.vercel.app/owner-login.html</a></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="doc-footer">
+    <span>&copy; 2024–2026 Subhadarshini Agro Pvt Ltd. All Rights Reserved.</span>
+    <span>Platform Documentation • Confidential Handover</span>
+    <span>Page 1 of 2</span>
+  </div>
+
+  <!-- ==================== PAGE 2 ==================== -->
+  <div class="page-break"></div>
+
+  <h2>4. Private Owner Portal & Security Credentials</h2>
+  <p>
+    To protect commercial customer data and wholesale dealer leads from competitors, the Owner Portal is secured behind an encrypted session gate. Unauthenticated requests to <code>/inquiries.html</code> are automatically redirected to the login gate.
+  </p>
+
+  <div class="creds-card">
+    <h4>🔒 Confidential Owner Credentials</h4>
+    <p style="font-size:7.8pt; color:#D1D5DB; margin-bottom:6px;">
+      Use these credentials to access the Customer Inquiries Ledger:
+    </p>
+    <div class="creds-grid">
+      <div class="cred-item">
+        <div class="cred-label">Owner Portal Login URL</div>
+        <div style="font-size:8.2pt; color:#F3F4F6;">https://masala-website-flax.vercel.app/owner-login.html</div>
+      </div>
+      <div class="cred-item">
+        <div class="cred-label">Direct Ledger URL</div>
+        <div style="font-size:8.2pt; color:#F3F4F6;">https://masala-website-flax.vercel.app/inquiries.html</div>
+      </div>
+      <div class="cred-item">
+        <div class="cred-label">Username</div>
+        <div class="cred-val">admin</div>
+      </div>
+      <div class="cred-item">
+        <div class="cred-label">Master Password</div>
+        <div class="cred-val">Subhadarshini@2026</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout-info">
+    <strong>💡 How to Change Credentials:</strong> The owner can update the username and password at any time by clicking the 
+    <strong>"Change Password"</strong> button in the top navigation bar of the Owner Portal.
+  </div>
+
+  <h2>5. Detailed Breakdown of New Advancements</h2>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <h5>Dynamic Pack Sizing</h5>
+      <p>Customers click 50g, 100g, 250g, or 500g buttons on any spice card. Prices recalculate in real time without page reload.</p>
+    </div>
+    <div class="feature-card">
+      <h5>1-Click WhatsApp Orders</h5>
+      <p>Connects directly to customer care (+91 6372585804), pre-filling spice name, weight, and price for instant checkout.</p>
+    </div>
+    <div class="feature-card">
+      <h5>Product Quick-View Modal</h5>
+      <p>Provides buyers with granular details: authentic ingredient percentages, culinary pairings, and key health benefits.</p>
+    </div>
+    <div class="feature-card">
+      <h5>Real-Time Inquiries Pipeline</h5>
+      <p>Customer inquiries are logged with tracking IDs (#SUB-XXXXXX) and synchronized across serverless instances in real time.</p>
+    </div>
+    <div class="feature-card">
+      <h5>1-Click WhatsApp Follow-up</h5>
+      <p>In the Owner Portal, clicking "Reply" on any customer inquiry opens a WhatsApp chat pre-filled with their tracking ID.</p>
+    </div>
+    <div class="feature-card">
+      <h5>Export to Excel / CSV</h5>
+      <p>One-click export allows leadership to download lifetime inquiry logs into Microsoft Excel or Google Sheets for CRM records.</p>
+    </div>
+  </div>
+
+  <h2>6. Technical Stack & Deployment Architecture</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 25%;">Layer</th>
+        <th style="width: 30%;">Technology</th>
+        <th style="width: 45%;">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Frontend Engine</strong></td>
+        <td>HTML5, Vanilla CSS3, ES6+ JS</td>
+        <td>Ultra-fast, zero bloat, native browser rendering with no heavy framework dependencies.</td>
+      </tr>
+      <tr>
+        <td><strong>Serverless API</strong></td>
+        <td>Node.js Serverless Functions</td>
+        <td>Modular micro-endpoints (<code>/api/contact</code>, <code>/api/inquiries</code>, <code>/api/owner/*</code>).</td>
+      </tr>
+      <tr>
+        <td><strong>Security Architecture</strong></td>
+        <td>HMAC-SHA256 Token Auth</td>
+        <td>Stateless cryptographic signature cookies & Bearer tokens valid for 14-day authenticated sessions.</td>
+      </tr>
+      <tr>
+        <td><strong>Cloud Hosting</strong></td>
+        <td>Vercel Global Edge Network</td>
+        <td>Automatic SSL encryption (HTTPS), automated continuous deployment from GitHub main branch.</td>
+      </tr>
+      <tr>
+        <td><strong>Code Repository</strong></td>
+        <td>GitHub (Masala_Website)</td>
+        <td>Version controlled, encrypted repository linked directly to production deployment pipeline.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>7. Company Directory & Facility Information</h2>
+  <ul style="margin: 0.35rem 0; padding-left: 1.25rem; font-size: 8pt; color: #374151; line-height:1.5;">
+    <li><strong>Corporate Office:</strong> N3/394, IRC Village, Nayapalli, Bhubaneswar - 751015, Odisha, India</li>
+    <li><strong>Manufacturing Plant:</strong> Plot No: 1538 & 1537, Village Sendapur, Mouza Bidyadharpur, Post Godisahi, Cuttack - 754005, Odisha</li>
+    <li><strong>Customer Care & WhatsApp Hotline:</strong> +91 6372585804 &nbsp;|&nbsp; <strong>Email:</strong> care@subhadarshini.com</li>
+    <li><strong>Official Social Channels:</strong> Facebook (Subhadarshini Spices), Instagram (@subhadarshini_masala)</li>
+  </ul>
+
+  <div class="doc-footer">
+    <span>&copy; 2024–2026 Subhadarshini Agro Pvt Ltd. All Rights Reserved.</span>
+    <span>Platform Documentation • Confidential Handover</span>
+    <span>Page 2 of 2</span>
+  </div>
+
+</body>
+</html>

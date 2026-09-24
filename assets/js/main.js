@@ -392,7 +392,7 @@ window.closeProductModal = function() {
   document.body.style.overflow = '';
 };
 
-// --- Contact Form Submission to Live Receiving Server & Local Persistence ---
+// --- Contact Form Submission to Backend (Supabase Cloud Persistence) ---
 function initContactForms() {
   const contactForm = document.getElementById('contactForm');
   if (!contactForm) return;
@@ -401,7 +401,7 @@ function initContactForms() {
     e.preventDefault();
 
     const submitBtn = contactForm.querySelector('button[type="submit"]');
-    const originalBtnHTML = submitBtn ? submitBtn.innerHTML : 'Send Inquiry Message';
+    const originalBtnHTML = submitBtn ? submitBtn.innerHTML : '<i class="fas fa-paper-plane"></i> Send Inquiry Message';
 
     const payload = {
       name: (contactForm.querySelector('[name="name"]')?.value || '').trim(),
@@ -413,37 +413,24 @@ function initContactForms() {
     };
 
     if (!payload.name || !payload.phone || !payload.email || !payload.message) {
-      showToast('⚠️ Please fill in all required fields.');
+      showToast('⚠️ Please fill in all required fields (Name, Phone, Email, and Message).');
       return;
     }
 
-    const tempId = 'SUB-' + Date.now().toString().slice(-6);
-    const localEntry = {
-      id: tempId,
-      receivedAt: new Date().toISOString(),
-      name: payload.name,
-      phone: payload.phone,
-      email: payload.email,
-      inquiryType: payload.inquiryType,
-      subject: payload.subject || 'Product Inquiry',
-      message: payload.message,
-      status: 'New'
-    };
-
-    // 1. Instantly record into browser localStorage so it is NEVER lost
-    try {
-      let saved = JSON.parse(localStorage.getItem('subhadarshini_inquiries') || '[]');
-      if (!Array.isArray(saved)) saved = [];
-      saved.unshift(localEntry);
-      localStorage.setItem('subhadarshini_inquiries', JSON.stringify(saved));
-    } catch (err) {}
+    const digitsOnly = payload.phone.replace(/\D/g, '');
+    if (digitsOnly.length < 10) {
+      showToast('⚠️ Please enter a valid 10-digit mobile number.');
+      const phoneInput = contactForm.querySelector('[name="phone"]');
+      if (phoneInput) phoneInput.focus();
+      return;
+    }
 
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting to Server...';
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending Inquiry...';
     }
 
-    let finalId = tempId;
+    let finalId = 'SUB-' + Math.floor(100000 + Math.random() * 900000);
 
     try {
       const response = await fetch('/api/contact', {
@@ -455,39 +442,44 @@ function initContactForms() {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        finalId = result.inquiryId || tempId;
-        // Update stored local entry with final server ID
-        try {
-          let saved = JSON.parse(localStorage.getItem('subhadarshini_inquiries') || '[]');
-          if (Array.isArray(saved) && saved.length > 0) {
-            saved[0].id = finalId;
-            localStorage.setItem('subhadarshini_inquiries', JSON.stringify(saved));
-          }
-        } catch (e) {}
+        finalId = result.inquiryId || finalId;
+        showToast(`✅ Inquiry registered! Reference #${finalId}. Our team will contact you shortly.`);
 
-        showToast(`✅ Inquiry Received! Reference #${finalId}. Our team will contact you shortly.`);
+        // Display inline confirmation card
+        const successNotice = document.getElementById('contactSuccessNotice');
+        const inqIdEl = document.getElementById('successInquiryId');
+        const waBtn = document.getElementById('successWaBtn');
+        if (successNotice) {
+          if (inqIdEl) inqIdEl.textContent = '#' + finalId;
+          if (waBtn) {
+            const waText = encodeURIComponent(`Namaskar Subhadarshini Spices, I have submitted an inquiry (Ref #${finalId}) from ${payload.name} regarding "${payload.subject}". Looking forward to hearing from your team.`);
+            waBtn.href = `https://wa.me/916372585804?text=${waText}`;
+          }
+          successNotice.style.display = 'block';
+          successNotice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        contactForm.reset();
       } else {
-        throw new Error(result.error || 'Server rejected inquiry');
+        throw new Error(result.error || 'Server error occurred while submitting inquiry.');
       }
     } catch (err) {
-      console.warn('Network server API unavailable, saved locally to portal:', err);
-      showToast(`✅ Inquiry saved locally! Reference #${finalId}. Opening WhatsApp follow-up...`);
-    } finally {
-      // Display inline success card if element exists
+      console.warn('Inquiry submission error:', err);
+      showToast(`⚠️ Could not reach server directly. Please connect with our team on WhatsApp: +91 6372585804`);
+      
+      // Fallback: Enable instant WhatsApp link
       const successNotice = document.getElementById('contactSuccessNotice');
-      const inqIdEl = document.getElementById('successInquiryId');
-      const waBtn = document.getElementById('successWaBtn');
       if (successNotice) {
+        const inqIdEl = document.getElementById('successInquiryId');
+        const waBtn = document.getElementById('successWaBtn');
         if (inqIdEl) inqIdEl.textContent = '#' + finalId;
         if (waBtn) {
-          const waText = encodeURIComponent(`Hello Subhadarshini Spices, I just submitted an inquiry (${finalId}) from ${payload.name} (${payload.phone}) regarding "${payload.subject}".`);
+          const waText = encodeURIComponent(`Namaskar Subhadarshini Spices, I would like to enquire about ${payload.subject}. My name is ${payload.name} (${payload.phone}).`);
           waBtn.href = `https://wa.me/916372585804?text=${waText}`;
         }
         successNotice.style.display = 'block';
-        successNotice.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
-
-      contactForm.reset();
+    } finally {
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnHTML;

@@ -1,5 +1,29 @@
 [
   {
+    "id": "SUB-369141",
+    "receivedAt": "2026-09-24T05:34:14.832Z",
+    "name": "Ramesh Sahoo",
+    "phone": "8907654678",
+    "email": "ramesh123@gmail.com",
+    "inquiryType": "General Trade Query",
+    "subject": "testing purpose",
+    "message": "nothingggggggggggggggggggggggg",
+    "status": "New",
+    "notes": ""
+  },
+  {
+    "id": "SUB-889314",
+    "receivedAt": "2026-09-24T05:30:59.131Z",
+    "name": "Bijayalaxmi Lenka",
+    "phone": "9876543210",
+    "email": "bijaya@example.com",
+    "inquiryType": "Dealership and Distributorship",
+    "subject": "Dealership in Bhubaneswar",
+    "message": "We want to stock Subhadarshini Dalma Masala and Turmeric Powder in our Nayapalli store.",
+    "status": "Contacted",
+    "notes": "Spoke with Bijayalaxmi. Saffron & Dalma samples dispatched to Nayapalli."
+  },
+  {
     "id": "SUB-321846",
     "receivedAt": "2026-09-19T11:12:01.846Z",
     "name": "Suruchi  jha",
@@ -29,7 +53,8 @@
     "inquiryType": "Distributorship Enquiry",
     "subject": "Distributor for Sambalpur",
     "message": "Looking to distribute your spices.",
-    "receivedAt": "2026-09-19T10:20:52.918Z"
+    "receivedAt": "2026-09-19T10:20:52.918Z",
+    "status": "Resolved"
   },
   {
     "id": "SUB-027310",
@@ -47,7 +72,8 @@
     "email": "pooja@gmail.com",
     "inquiryType": "Bulk Wholesale Purchase",
     "subject": "Requirement for Wedding function",
-    "message": "Need 20kg turmeric and 10kg cumin powder."
+    "message": "Need 20kg turmeric and 10kg cumin powder.",
+    "status": "In Discussion"
   },
   {
     "id": "SUB-153735",
@@ -56,6 +82,7 @@
     "email": "bijayalaxmi@example.com",
     "inquiryType": "Distributorship Enquiry",
     "subject": "Wholesale Dealership in Bhubaneswar",
-    "message": "Hello! Please send me wholesale price list for Subhadarshini Spices."
+    "message": "Hello! Please send me wholesale price list for Subhadarshini Spices.",
+    "status": "Resolved"
   }
 ]

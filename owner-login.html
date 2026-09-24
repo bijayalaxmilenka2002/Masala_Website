@@ -232,22 +232,14 @@
             localStorage.setItem('subha_owner_token', data.token);
             sessionStorage.setItem('subha_owner_token', data.token);
           }
-          // Redirect directly to inquiries dashboard
+          // Redirect directly to Owner Inquiries Dashboard
           window.location.href = '/inquiries.html';
         } else {
-          errorDiv.textContent = data.error || 'Authentication failed. Please check credentials.';
+          errorDiv.textContent = data.error || 'Authentication failed. Please check your credentials.';
           errorDiv.style.display = 'block';
         }
       } catch (err) {
-        // Fallback for static server or network issue:
-        // If credentials match default offline credentials, permit local access
-        if (user === 'admin' && pass === 'Subhadarshini@2026') {
-          localStorage.setItem('subha_owner_token', 'local_offline_auth_token');
-          sessionStorage.setItem('subha_owner_token', 'local_offline_auth_token');
-          window.location.href = '/inquiries.html';
-          return;
-        }
-        errorDiv.textContent = 'Server connection error. Please try again.';
+        errorDiv.textContent = 'Server connection error. Please verify the server is running and try again.';
         errorDiv.style.display = 'block';
       } finally {
         submitBtn.disabled = false;

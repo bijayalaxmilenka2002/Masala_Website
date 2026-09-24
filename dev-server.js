@@ -1,18 +1,17 @@
 /**
  * Subhadarshini Spices - Dedicated Live Web & API Server
- * Built with native Node.js (zero external dependencies, ultra-fast performance)
+ * Built with native Node.js and integrated with Supabase Cloud Database.
+ *
  * Features:
  * - High-speed static asset serving with clean URLs (/about, /products, etc.)
- * - Live Contact Form Receiving API (`POST /api/contact`)
- * - Persistent JSON Inquiry Database (`data/inquiries.json`)
- * - Persistent Owner Credentials (`data/admin-config.json`)
- * - Inquiry Status Management (`PATCH /api/inquiries`)
- * - Inquiry Deletion (`DELETE /api/inquiries`)
- * - Owner Credential Management (`POST /api/owner/change-credentials`)
+ * - Live Contact Form Receiving API (`POST /api/contact`) saved directly to Supabase
+ * - Persistent Owner Credentials (`data/admin-config.json` & env)
+ * - Protected Owner Portal API (`/api/inquiries`, `/api/owner/*`)
  * - STRICT SERVER-SIDE OWNER AUTHENTICATION:
  *   - Only authenticated owners can access `/inquiries.html` or `/api/inquiries`
  *   - Unauthenticated visitors are blocked and redirected to `/owner-login.html`
  *   - Stateless HMAC token authentication survives server restarts
+ * - Supabase Cloud Database with seamless local JSON fallback
  */
 
 const http = require('http');
@@ -21,21 +20,22 @@ const path = require('path');
 const url = require('url');
 const crypto = require('crypto');
 
+// Load environment variables from .env
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+
+const supabaseService = require('./api/_supabase');
+
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = __dirname;
 const DATA_DIR = path.join(__dirname, 'data');
-const INQUIRIES_FILE = path.join(DATA_DIR, 'inquiries.json');
 const CONFIG_FILE = path.join(DATA_DIR, 'admin-config.json');
 
 // In-Memory Active Sessions (plus HMAC verification)
 const activeSessions = new Set();
 
-// Ensure data directory and files exist
+// Ensure data directory exists
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
-}
-if (!fs.existsSync(INQUIRIES_FILE)) {
-  fs.writeFileSync(INQUIRIES_FILE, JSON.stringify([], null, 2), 'utf8');
 }
 if (!fs.existsSync(CONFIG_FILE)) {
   fs.writeFileSync(CONFIG_FILE, JSON.stringify({
@@ -49,14 +49,17 @@ function getOwnerCredentials() {
   try {
     if (fs.existsSync(CONFIG_FILE)) {
       const data = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-      if (data.username && data.password) {
+      if (data && data.username && data.password) {
         return { username: String(data.username).trim(), password: String(data.password).trim() };
       }
     }
   } catch (e) {
     console.warn('Could not read admin-config.json, using defaults:', e);
   }
-  return { username: 'admin', password: 'Subhadarshini@2026' };
+  return { 
+    username: process.env.OWNER_USER || 'admin', 
+    password: process.env.OWNER_PASS || 'Subhadarshini@2026' 
+  };
 }
 
 function saveOwnerCredentials(username, password) {
@@ -281,46 +284,51 @@ const server = http.createServer(async (req, res) => {
       if (!name || !phone || !email || !message) {
         return sendJSON(res, 400, {
           success: false,
-          error: 'Missing required fields: name, phone, email, and message are required.'
+          error: 'Missing required fields: Name, Phone, Email, and Message are required.'
         });
       }
 
-      const inquiryId = 'SUB-' + Date.now().toString().slice(-6);
+      const cleanName = String(name).trim();
+      const cleanPhone = String(phone).trim();
+      const cleanEmail = String(email).trim();
+      const cleanMessage = String(message).trim();
+
+      const digitsOnly = cleanPhone.replace(/\D/g, '');
+      if (digitsOnly.length < 10) {
+        return sendJSON(res, 400, {
+          success: false,
+          error: 'Please enter a valid 10-digit mobile number.'
+        });
+      }
+
+      const inquiryId = 'SUB-' + Math.floor(100000 + Math.random() * 900000);
       const newEntry = {
         id: inquiryId,
         receivedAt: new Date().toISOString(),
-        name: String(name).trim(),
-        phone: String(phone).trim(),
-        email: String(email).trim(),
+        name: cleanName,
+        phone: cleanPhone,
+        email: cleanEmail,
         inquiryType: String(inquiryType || type || 'General Inquiry').trim(),
         subject: String(subject || 'Product Inquiry').trim(),
-        message: String(message).trim(),
-        status: 'New'
+        message: cleanMessage,
+        status: 'New',
+        notes: ''
       };
 
-      let inquiries = [];
-      try {
-        const fileContent = fs.readFileSync(INQUIRIES_FILE, 'utf8');
-        inquiries = JSON.parse(fileContent);
-        if (!Array.isArray(inquiries)) inquiries = [];
-      } catch (e) {
-        inquiries = [];
-      }
+      // Save into Supabase backend
+      const result = await supabaseService.saveInquiry(newEntry);
 
-      inquiries.unshift(newEntry);
-      fs.writeFileSync(INQUIRIES_FILE, JSON.stringify(inquiries, null, 2), 'utf8');
-
-      console.log(`[NEW LEAD RECEIVED] #${inquiryId} from ${newEntry.name} (${newEntry.phone}) | ${newEntry.inquiryType}`);
+      console.log(`[INQUIRY SAVED TO ${result.storage?.toUpperCase() || 'BACKEND'}] #${inquiryId} from ${newEntry.name} (${newEntry.phone})`);
 
       return sendJSON(res, 201, {
         success: true,
-        message: 'Inquiry received successfully. Our team will contact you shortly.',
+        message: 'Thank you! Your inquiry has been safely received. Our sales team will get in touch with you shortly.',
         inquiryId: inquiryId,
         timestamp: newEntry.receivedAt,
-        inquiry: newEntry
+        storage: result.storage
       });
     } catch (err) {
-      return sendJSON(res, 400, { success: false, error: 'Invalid JSON payload.' });
+      return sendJSON(res, 400, { success: false, error: 'Invalid JSON payload format.' });
     }
   }
 
@@ -333,46 +341,47 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
+    // Health check endpoint for Supabase connection
+    if (req.method === 'GET' && parsedUrl.query.action === 'health') {
+      const health = await supabaseService.checkSupabaseHealth();
+      return sendJSON(res, 200, { success: true, health });
+    }
+
     // GET: Fetch all inquiries
     if (req.method === 'GET') {
       try {
-        const raw = fs.readFileSync(INQUIRIES_FILE, 'utf8');
-        const inquiries = JSON.parse(raw);
+        const result = await supabaseService.fetchInquiries();
         return sendJSON(res, 200, {
           success: true,
-          count: inquiries.length,
-          inquiries: inquiries
+          count: result.inquiries.length,
+          source: result.source,
+          inquiries: result.inquiries
         });
       } catch (err) {
-        return sendJSON(res, 500, { success: false, error: 'Could not read inquiries.' });
+        return sendJSON(res, 500, { success: false, error: 'Could not fetch inquiries.' });
       }
     }
 
-    // PATCH: Update status
+    // PATCH: Update status or owner notes
     if (req.method === 'PATCH') {
       try {
         const raw = await readBody(req);
-        const { id, status } = JSON.parse(raw);
-        if (!id || !status) {
-          return sendJSON(res, 400, { success: false, error: 'Inquiry ID and new status required.' });
+        const { id, status, notes } = JSON.parse(raw);
+        if (!id) {
+          return sendJSON(res, 400, { success: false, error: 'Inquiry ID is required.' });
         }
 
-        let inquiries = JSON.parse(fs.readFileSync(INQUIRIES_FILE, 'utf8'));
-        let found = false;
-        inquiries = inquiries.map(i => {
-          if (i.id === id) {
-            found = true;
-            return { ...i, status: String(status).trim() };
-          }
-          return i;
+        const updates = {};
+        if (status !== undefined) updates.status = String(status).trim();
+        if (notes !== undefined) updates.notes = String(notes).trim();
+
+        const updateResult = await supabaseService.updateInquiry(id, updates);
+
+        return sendJSON(res, 200, { 
+          success: true, 
+          message: `Inquiry #${id} updated successfully.`,
+          storage: updateResult.storage
         });
-
-        if (!found) {
-          return sendJSON(res, 404, { success: false, error: 'Inquiry not found.' });
-        }
-
-        fs.writeFileSync(INQUIRIES_FILE, JSON.stringify(inquiries, null, 2), 'utf8');
-        return sendJSON(res, 200, { success: true, message: `Inquiry #${id} marked as ${status}.`, inquiries });
       } catch (e) {
         return sendJSON(res, 400, { success: false, error: 'Invalid update payload.' });
       }
@@ -384,18 +393,14 @@ const server = http.createServer(async (req, res) => {
         const raw = await readBody(req);
         const { id } = JSON.parse(raw);
         if (!id) {
-          return sendJSON(res, 400, { success: false, error: 'Inquiry ID required.' });
+          return sendJSON(res, 400, { success: false, error: 'Inquiry ID is required to delete.' });
         }
 
-        let inquiries = JSON.parse(fs.readFileSync(INQUIRIES_FILE, 'utf8'));
-        const filtered = inquiries.filter(i => i.id !== id);
-
-        if (filtered.length === inquiries.length) {
-          return sendJSON(res, 404, { success: false, error: 'Inquiry not found.' });
-        }
-
-        fs.writeFileSync(INQUIRIES_FILE, JSON.stringify(filtered, null, 2), 'utf8');
-        return sendJSON(res, 200, { success: true, message: `Inquiry #${id} deleted successfully.`, count: filtered.length });
+        await supabaseService.deleteInquiry(id);
+        return sendJSON(res, 200, { 
+          success: true, 
+          message: `Inquiry #${id} permanently deleted from database.` 
+        });
       } catch (e) {
         return sendJSON(res, 400, { success: false, error: 'Failed to delete inquiry.' });
       }
@@ -462,12 +467,13 @@ const server = http.createServer(async (req, res) => {
 
 const currentCreds = getOwnerCredentials();
 server.listen(PORT, () => {
+  const isSupaConfigured = supabaseService.isSupabaseConfigured();
   console.log(`====================================================`);
   console.log(`  Subhadarshini Spices Live Server Active`);
   console.log(`  Website:       http://localhost:${PORT}`);
   console.log(`  Owner Portal:  http://localhost:${PORT}/inquiries.html (Protected)`);
   console.log(`  Owner Login:   http://localhost:${PORT}/owner-login.html`);
   console.log(`  Current User:  ${currentCreds.username}`);
-  console.log(`  Credentials:   Stored in data/admin-config.json`);
+  console.log(`  Supabase:      ${isSupaConfigured ? '🟢 Connected to Cloud' : '🟡 Local Mode (Add keys in .env)'}`);
   console.log(`====================================================`);
 });
