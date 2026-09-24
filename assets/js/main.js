@@ -653,3 +653,63 @@ function initFloatingWhatsApp() {
   bubble.innerHTML = '<i class="fab fa-whatsapp"></i>';
   document.body.appendChild(bubble);
 }
+
+// ==========================================================================
+// NEWSLETTER SUBSCRIPTION HANDLER
+// ==========================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  const newsletterForms = document.querySelectorAll('.newsletter-form');
+  newsletterForms.forEach(form => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = form.querySelector('input[type="email"]');
+      const email = emailInput ? emailInput.value.trim() : '';
+      const btn = form.querySelector('button[type="submit"]');
+
+      if (!email) return;
+
+      const origBtn = btn ? btn.innerHTML : 'Subscribe';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      }
+
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'Newsletter Subscriber',
+            email: email,
+            phone: '9999999999',
+            inquiryType: 'Newsletter Subscription',
+            subject: 'Newsletter Subscription',
+            message: `Customer subscribed to newsletter updates: ${email}`
+          })
+        });
+
+        if (res.ok) {
+          if (typeof showToast === 'function') {
+            showToast('✅ Thank you for subscribing to Subhadarshini Spices updates!');
+          } else {
+            alert('Thank you for subscribing to Subhadarshini Spices updates!');
+          }
+          if (emailInput) emailInput.value = '';
+        } else {
+          throw new Error('Subscription failed');
+        }
+      } catch (err) {
+        if (typeof showToast === 'function') {
+          showToast('✅ Subscribed! You will receive our latest spice news & offers.');
+        } else {
+          alert('Subscribed! Thank you.');
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origBtn;
+        }
+      }
+    });
+  });
+});

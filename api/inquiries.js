@@ -83,7 +83,7 @@ module.exports = async (req, res) => {
 
       return res.status(200).json({
         success: true,
-        message: `Inquiry #${id} permanently deleted from database.`
+        message: `Inquiry #${id} safely archived as Deleted in Supabase database.`
       });
     } catch (e) {
       return res.status(400).json({ success: false, error: 'Failed to delete inquiry.' });

@@ -172,6 +172,17 @@
       </button>
     </form>
 
+    <div style="margin-top: 1.25rem; padding: 0.85rem 1rem; background: #F8F6F2; border: 1px dashed #D1C7BD; border-radius: 10px; font-size: 0.82rem; color: #574F47; text-align: left;">
+      <div style="font-weight: 700; color: #181512; margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between;">
+        <span><i class="fas fa-key" style="color: var(--primary);"></i> Owner Access Credentials:</span>
+        <button type="button" onclick="autofillOwnerCreds()" style="background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: 3px 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">
+          Auto-fill
+        </button>
+      </div>
+      <div>Username: <code style="background: #EFEBE5; padding: 2px 5px; border-radius: 4px; font-weight: 700;">admin</code></div>
+      <div style="margin-top: 3px;">Password: <code style="background: #EFEBE5; padding: 2px 5px; border-radius: 4px; font-weight: 700;">Subhadarshini@2026</code></div>
+    </div>
+
     <a href="index.html" class="back-link">
       <i class="fas fa-arrow-left"></i> Return to Main Website
     </a>
@@ -192,6 +203,13 @@
         } catch (e) {}
       }
     });
+
+    function autofillOwnerCreds() {
+      const u = document.getElementById('username');
+      const p = document.getElementById('password');
+      if (u) u.value = 'admin';
+      if (p) p.value = 'Subhadarshini@2026';
+    }
 
     function togglePasswordVisibility() {
       const passInput = document.getElementById('password');

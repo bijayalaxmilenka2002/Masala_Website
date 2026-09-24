@@ -21,25 +21,29 @@ module.exports = async (req, res) => {
 
     const { name, phone, email, subject, inquiryType, type, message } = body || {};
 
+    const resolvedType = String(inquiryType || type || 'General Inquiry').trim();
+    const isNewsletter = resolvedType.toLowerCase().includes('newsletter');
+
+    const cleanEmail = String(email || '').trim();
+    const cleanName = String(name || (isNewsletter ? 'Newsletter Subscriber' : '')).trim();
+    const cleanPhone = String(phone || (isNewsletter ? '9999999999' : '')).trim();
+    const cleanMessage = String(message || (isNewsletter ? 'Newsletter subscription request.' : '')).trim();
+    const cleanSubject = String(subject || (isNewsletter ? 'Newsletter Subscription' : 'Product Inquiry')).trim();
+
     // Validate inputs
-    if (!name || !phone || !email || !message) {
+    if (!cleanName || !cleanPhone || !cleanEmail || !cleanMessage) {
       return res.status(400).json({
         success: false,
         error: 'Please fill in all required fields (Name, Phone, Email, and Message).'
       });
     }
 
-    const cleanName = String(name).trim();
-    const cleanPhone = String(phone).trim();
-    const cleanEmail = String(email).trim();
-    const cleanMessage = String(message).trim();
-
     if (cleanName.length < 2) {
       return res.status(400).json({ success: false, error: 'Please enter a valid full name.' });
     }
 
     const digitsOnly = cleanPhone.replace(/\D/g, '');
-    if (digitsOnly.length < 10) {
+    if (!isNewsletter && digitsOnly.length < 10) {
       return res.status(400).json({ success: false, error: 'Please enter a valid 10-digit mobile number.' });
     }
 
@@ -55,8 +59,8 @@ module.exports = async (req, res) => {
       name: cleanName,
       phone: cleanPhone,
       email: cleanEmail,
-      inquiryType: String(inquiryType || type || 'General Inquiry').trim(),
-      subject: String(subject || 'Product Inquiry').trim(),
+      inquiryType: resolvedType,
+      subject: cleanSubject,
       message: cleanMessage,
       status: 'New',
       notes: ''

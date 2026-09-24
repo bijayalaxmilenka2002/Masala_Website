@@ -279,22 +279,24 @@ const server = http.createServer(async (req, res) => {
     try {
       const raw = await readBody(req);
       const data = JSON.parse(raw);
-      const { name, phone, email, subject, inquiryType, type, message } = data;
+      const resolvedType = String(data.inquiryType || data.type || 'General Inquiry').trim();
+      const isNewsletter = resolvedType.toLowerCase().includes('newsletter');
 
-      if (!name || !phone || !email || !message) {
+      const cleanEmail = String(data.email || '').trim();
+      const cleanName = String(data.name || (isNewsletter ? 'Newsletter Subscriber' : '')).trim();
+      const cleanPhone = String(data.phone || (isNewsletter ? '9999999999' : '')).trim();
+      const cleanMessage = String(data.message || (isNewsletter ? 'Newsletter subscription request.' : '')).trim();
+      const cleanSubject = String(data.subject || (isNewsletter ? 'Newsletter Subscription' : 'Product Inquiry')).trim();
+
+      if (!cleanName || !cleanPhone || !cleanEmail || !cleanMessage) {
         return sendJSON(res, 400, {
           success: false,
           error: 'Missing required fields: Name, Phone, Email, and Message are required.'
         });
       }
 
-      const cleanName = String(name).trim();
-      const cleanPhone = String(phone).trim();
-      const cleanEmail = String(email).trim();
-      const cleanMessage = String(message).trim();
-
       const digitsOnly = cleanPhone.replace(/\D/g, '');
-      if (digitsOnly.length < 10) {
+      if (!isNewsletter && digitsOnly.length < 10) {
         return sendJSON(res, 400, {
           success: false,
           error: 'Please enter a valid 10-digit mobile number.'
@@ -308,8 +310,8 @@ const server = http.createServer(async (req, res) => {
         name: cleanName,
         phone: cleanPhone,
         email: cleanEmail,
-        inquiryType: String(inquiryType || type || 'General Inquiry').trim(),
-        subject: String(subject || 'Product Inquiry').trim(),
+        inquiryType: resolvedType,
+        subject: cleanSubject,
         message: cleanMessage,
         status: 'New',
         notes: ''
@@ -399,7 +401,7 @@ const server = http.createServer(async (req, res) => {
         await supabaseService.deleteInquiry(id);
         return sendJSON(res, 200, { 
           success: true, 
-          message: `Inquiry #${id} permanently deleted from database.` 
+          message: `Inquiry #${id} safely archived as Deleted in Supabase database.` 
         });
       } catch (e) {
         return sendJSON(res, 400, { success: false, error: 'Failed to delete inquiry.' });
