@@ -465,9 +465,6 @@
           <button type="button" onclick="generateExecutivePDFReport()" class="btn btn-primary btn-sm" style="background:var(--portal-accent); border-color:var(--portal-accent); cursor:pointer;" title="Download clean Executive PDF Lead Report">
             <i class="fas fa-file-pdf"></i> Download PDF Report
           </button>
-          <button type="button" onclick="exportToCSV()" class="btn btn-secondary btn-sm" style="background:#166534; color:#fff; border:none; cursor:pointer;" title="Download clean Excel / CSV file">
-            <i class="fas fa-file-excel"></i> Export CSV
-          </button>
           <button type="button" onclick="fetchInquiries(true)" class="btn btn-secondary btn-sm" id="refreshBtn" style="cursor:pointer;" title="Refresh latest inquiries">
             <i class="fas fa-sync-alt" id="refreshIcon"></i> Refresh
           </button>
@@ -1166,61 +1163,6 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
       });
     }
 
-    // --- Clean, Human-Readable CSV Exporter ---
-    function exportToCSV() {
-      if (!allInquiries || allInquiries.length === 0) {
-        alert('No inquiries to export.');
-        return;
-      }
-
-      // Column Headers
-      const headers = [
-        'Inquiry Ref ID',
-        'Date & Time (IST)',
-        'Customer Name',
-        'Mobile Phone',
-        'Email Address',
-        'Inquiry Category',
-        'Subject',
-        'Customer Requirement / Message',
-        'Lead Status',
-        'Internal CRM Notes'
-      ];
-
-      const rows = allInquiries.map(i => {
-        const cleanMsg = (i.message || '').replace(/[\r\n]+/g, ' ').replace(/"/g, '""');
-        const cleanSubject = (i.subject || '').replace(/"/g, '""');
-        const cleanNotes = (i.notes || '').replace(/[\r\n]+/g, ' ').replace(/"/g, '""');
-        const cleanName = (i.name || '').replace(/"/g, '""');
-        const formattedDate = formatDateIST(i.receivedAt);
-
-        return [
-          `"${i.id}"`,
-          `"${formattedDate}"`,
-          `"${cleanName}"`,
-          `"${i.phone || ''}"`,
-          `"${i.email || ''}"`,
-          `"${i.inquiryType || 'General Inquiry'}"`,
-          `"${cleanSubject}"`,
-          `"${cleanMsg}"`,
-          `"${i.status || 'New'}"`,
-          `"${cleanNotes}"`
-        ];
-      });
-
-      // Include UTF-8 BOM (\uFEFF) so Excel, LibreOffice & Notepad open with proper columns immediately
-      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `Subhadarshini-Leads-Report-${new Date().toISOString().slice(0,10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }
 
     // --- Executive PDF Report Generator (Prints/Saves to PDF directly) ---
     function generateExecutivePDFReport() {
