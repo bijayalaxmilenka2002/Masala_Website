@@ -1,88 +1,28 @@
 [
   {
-    "id": "SUB-369141",
-    "receivedAt": "2026-09-24T05:34:14.832Z",
-    "name": "Ramesh Sahoo",
-    "phone": "8907654678",
-    "email": "ramesh123@gmail.com",
-    "inquiryType": "General Trade Query",
-    "subject": "testing purpose",
-    "message": "nothingggggggggggggggggggggggg",
+    "id": "SUB-167800",
+    "receivedAt": "2026-09-24T06:02:03.083+00:00",
+    "name": "Tapas Kumar Sahu",
+    "phone": "9437123456",
+    "email": "tapas@gmail.com",
+    "inquiryType": "Dealership & Distributorship",
+    "subject": "Distributorship for Berhampur Market",
+    "message": "We are leading FMCG distributors in southern Odisha. Looking for dealership terms for Subhadarshini Spices.",
     "status": "New",
-    "notes": ""
+    "notes": "",
+    "source": "Website Contact Form"
   },
   {
-    "id": "SUB-889314",
-    "receivedAt": "2026-09-24T05:30:59.131Z",
-    "name": "Bijayalaxmi Lenka",
+    "id": "SUB-LIVE01",
+    "receivedAt": "2026-09-24T06:01:26.196+00:00",
+    "name": "Bijayalaxmi Lenka (Live Test)",
     "phone": "9876543210",
-    "email": "bijaya@example.com",
-    "inquiryType": "Dealership and Distributorship",
-    "subject": "Dealership in Bhubaneswar",
-    "message": "We want to stock Subhadarshini Dalma Masala and Turmeric Powder in our Nayapalli store.",
-    "status": "Contacted",
-    "notes": "Spoke with Bijayalaxmi. Saffron & Dalma samples dispatched to Nayapalli."
-  },
-  {
-    "id": "SUB-321846",
-    "receivedAt": "2026-09-19T11:12:01.846Z",
-    "name": "Suruchi  jha",
-    "phone": "9102812338",
-    "email": "suruchijha798@gmail.com",
-    "inquiryType": "General Query",
-    "subject": "testing",
-    "message": "testing",
-    "status": "New"
-  },
-  {
-    "id": "SUB-855250",
-    "receivedAt": "2026-09-19T11:04:15.250Z",
-    "name": "Test Persistence Lead",
-    "phone": "9876543210",
-    "email": "testlead@gmail.com",
-    "inquiryType": "Distributorship Enquiry",
-    "subject": "Persistence Test",
-    "message": "Testing if this persists seamlessly",
-    "status": "New"
-  },
-  {
-    "id": "SUB-LIVE99",
-    "name": "Fresh Live Test Lead",
-    "phone": "9123456789",
-    "email": "livelead@gmail.com",
-    "inquiryType": "Distributorship Enquiry",
-    "subject": "Distributor for Sambalpur",
-    "message": "Looking to distribute your spices.",
-    "receivedAt": "2026-09-19T10:20:52.918Z",
-    "status": "Resolved"
-  },
-  {
-    "id": "SUB-027310",
-    "name": "Direct Live Customer Test",
-    "phone": "9871122334",
-    "email": "customer@live.com",
-    "inquiryType": "Distributorship Enquiry",
-    "subject": "Agency Inquiry for Berhampur",
-    "message": "Looking for Subhadarshini masala dealership in southern Odisha."
-  },
-  {
-    "id": "SUB-822407",
-    "name": "Pooja Mohanty",
-    "phone": "9988776655",
-    "email": "pooja@gmail.com",
-    "inquiryType": "Bulk Wholesale Purchase",
-    "subject": "Requirement for Wedding function",
-    "message": "Need 20kg turmeric and 10kg cumin powder.",
-    "status": "In Discussion"
-  },
-  {
-    "id": "SUB-153735",
-    "name": "Bijayalaxmi Lenka",
-    "phone": "9876543210",
-    "email": "bijayalaxmi@example.com",
-    "inquiryType": "Distributorship Enquiry",
-    "subject": "Wholesale Dealership in Bhubaneswar",
-    "message": "Hello! Please send me wholesale price list for Subhadarshini Spices.",
-    "status": "Resolved"
+    "email": "bijayalaxmi@subhadarshini.com",
+    "inquiryType": "Dealership & Distributorship",
+    "subject": "Live Cloud Persistence Test",
+    "message": "Testing end-to-end Supabase cloud integration for Subhadarshini Spices.",
+    "status": "New",
+    "notes": "Initial live Supabase connection verified.",
+    "source": "Website Contact Form"
   }
 ]

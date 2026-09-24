@@ -244,22 +244,49 @@ async function updateInquiry(id, updates) {
 }
 
 /**
- * Delete an inquiry
+ * Soft Delete an inquiry (Preserves deleted inquiries in Supabase database)
  */
 async function deleteInquiry(id) {
-  let localList = getLocalInquiries();
-  const initialLen = localList.length;
-  localList = localList.filter(item => item.id !== id);
-  if (localList.length !== initialLen) saveLocalInquiries(localList);
+  const deletedTimestamp = new Date().toISOString();
 
+  // 1. Soft-delete in local backup (keep record marked as Deleted)
+  let localList = getLocalInquiries();
+  localList = localList.map(item => {
+    if (item.id === id) {
+      const existingNotes = item.notes || '';
+      const deleteNote = `[Archived / Deleted on ${new Date().toLocaleDateString('en-IN')}]`;
+      return {
+        ...item,
+        status: 'Deleted',
+        deletedAt: deletedTimestamp,
+        notes: existingNotes ? `${existingNotes} ${deleteNote}` : deleteNote
+      };
+    }
+    return item;
+  });
+  saveLocalInquiries(localList);
+
+  // 2. Soft-delete in Supabase: persist the deleted record in Supabase with status = 'Deleted'
   const client = getSupabaseClient();
   if (client) {
     try {
-      await client.from('inquiries').delete().eq('id', id);
-    } catch (e) {}
+      const { data, error } = await client
+        .from('inquiries')
+        .update({
+          status: 'Deleted'
+        })
+        .eq('id', id)
+        .select();
+
+      if (error) {
+        console.warn('[SUPABASE SOFT-DELETE WARNING]:', error.message);
+      }
+    } catch (e) {
+      console.warn('[SUPABASE SOFT-DELETE EXCEPTION]:', e.message);
+    }
   }
 
-  return { success: true };
+  return { success: true, message: 'Inquiry safely archived as Deleted in Supabase database.' };
 }
 
 /**

@@ -414,7 +414,7 @@
   <main class="portal-container" style="margin-top: 1.5rem;">
     
     <!-- Top Stat Cards -->
-    <div class="stats-grid">
+    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
       <div class="stat-card">
         <div class="stat-icon"><i class="fas fa-inbox"></i></div>
         <div>
@@ -443,6 +443,13 @@
           <div class="stat-desc">Followed Up / Closed</div>
         </div>
       </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#F3F4F6; color:#6B7280;"><i class="fas fa-trash-restore"></i></div>
+        <div>
+          <div class="stat-num" id="deletedCount" style="color:#6B7280;">0</div>
+          <div class="stat-desc">Deleted in Supabase</div>
+        </div>
+      </div>
     </div>
 
     <!-- Leads Table Card -->
@@ -454,8 +461,11 @@
             Loading inquiries from database...
           </span>
         </div>
-        <div style="display:flex; gap:0.6rem; align-items:center;">
-          <button type="button" onclick="exportToCSV()" class="btn btn-secondary btn-sm" style="background:#166534; color:#fff; border:none; cursor:pointer;" title="Download inquiries into Excel / CSV format">
+        <div style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+          <button type="button" onclick="generateExecutivePDFReport()" class="btn btn-primary btn-sm" style="background:var(--portal-accent); border-color:var(--portal-accent); cursor:pointer;" title="Download clean Executive PDF Lead Report">
+            <i class="fas fa-file-pdf"></i> Download PDF Report
+          </button>
+          <button type="button" onclick="exportToCSV()" class="btn btn-secondary btn-sm" style="background:#166534; color:#fff; border:none; cursor:pointer;" title="Download clean Excel / CSV file">
             <i class="fas fa-file-excel"></i> Export CSV
           </button>
           <button type="button" onclick="fetchInquiries(true)" class="btn btn-secondary btn-sm" id="refreshBtn" style="cursor:pointer;" title="Refresh latest inquiries">
@@ -480,11 +490,13 @@
         </select>
 
         <select id="statusFilter" class="filter-dropdown" onchange="applyFilters()">
-          <option value="all">All Statuses</option>
+          <option value="active" selected>All Active Leads</option>
+          <option value="all">All (Including Deleted)</option>
           <option value="New">Status: New</option>
           <option value="Contacted">Status: Contacted</option>
           <option value="In Discussion">Status: In Discussion</option>
           <option value="Resolved">Status: Resolved</option>
+          <option value="Deleted">Status: Deleted / Archived</option>
         </select>
 
         <span id="filterCount" style="font-size:0.84rem; color:#786E64; font-weight:700; margin-left:auto;">
@@ -723,20 +735,26 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
       const newCount = document.getElementById('newCount');
       const dealershipCount = document.getElementById('dealershipCount');
       const resolvedCount = document.getElementById('resolvedCount');
+      const deletedCount = document.getElementById('deletedCount');
+
+      const activeList = allInquiries.filter(i => (i.status || '').toLowerCase() !== 'deleted');
 
       if (totalCount) totalCount.textContent = allInquiries.length;
       if (newCount) {
-        newCount.textContent = allInquiries.filter(i => (i.status || 'New').toLowerCase() === 'new').length;
+        newCount.textContent = activeList.filter(i => (i.status || 'New').toLowerCase() === 'new').length;
       }
       if (dealershipCount) {
-        dealershipCount.textContent = allInquiries.filter(i => 
+        dealershipCount.textContent = activeList.filter(i => 
           (i.inquiryType && i.inquiryType.toLowerCase().includes('dealer')) ||
           (i.inquiryType && i.inquiryType.toLowerCase().includes('distributor')) ||
           (i.subject && i.subject.toLowerCase().includes('distributor'))
         ).length;
       }
       if (resolvedCount) {
-        resolvedCount.textContent = allInquiries.filter(i => (i.status || '').toLowerCase() === 'resolved').length;
+        resolvedCount.textContent = activeList.filter(i => (i.status || '').toLowerCase() === 'resolved').length;
+      }
+      if (deletedCount) {
+        deletedCount.textContent = allInquiries.filter(i => (i.status || '').toLowerCase() === 'deleted').length;
       }
     }
 
@@ -744,7 +762,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
     function applyFilters() {
       const search = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
       const typeVal = document.getElementById('typeFilter')?.value || 'all';
-      const statusVal = document.getElementById('statusFilter')?.value || 'all';
+      const statusVal = document.getElementById('statusFilter')?.value || 'active';
       const countEl = document.getElementById('filterCount');
 
       const filtered = allInquiries.filter(item => {
@@ -763,8 +781,16 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
         }
 
         let matchesStatus = true;
-        if (statusVal !== 'all') {
-          matchesStatus = (item.status || 'New').toLowerCase() === statusVal.toLowerCase();
+        const curStatus = (item.status || 'New').toLowerCase();
+
+        if (statusVal === 'active') {
+          matchesStatus = curStatus !== 'deleted';
+        } else if (statusVal === 'all') {
+          matchesStatus = true;
+        } else if (statusVal === 'Deleted') {
+          matchesStatus = curStatus === 'deleted';
+        } else {
+          matchesStatus = curStatus === statusVal.toLowerCase();
         }
 
         return matchesSearch && matchesType && matchesStatus;
@@ -809,8 +835,11 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
         else if (inqType.includes('Feedback')) badgeClass = 'badge-feedback';
 
         const curStatus = item.status || 'New';
+        const isDeleted = curStatus.toLowerCase() === 'deleted';
+
         let statusCss = 'status-new';
-        if (curStatus === 'Contacted') statusCss = 'status-contacted';
+        if (isDeleted) statusCss = 'status-deleted';
+        else if (curStatus === 'Contacted') statusCss = 'status-contacted';
         else if (curStatus === 'In Discussion') statusCss = 'status-discussion';
         else if (curStatus === 'Resolved') statusCss = 'status-resolved';
 
@@ -819,7 +848,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
         const waText = encodeURIComponent(`Namaskar ${item.name}, thank you for contacting Subhadarshini Spices regarding your inquiry (${item.id}). How can we assist you with our spice products and dealership details?`);
 
         return `
-          <tr id="row-${escapeHTML(item.id)}">
+          <tr id="row-${escapeHTML(item.id)}" style="${isDeleted ? 'opacity:0.75; background:#FEF2F2;' : ''}">
             <td>
               <strong style="color:var(--portal-accent); font-size:0.92rem; display:block;">#${escapeHTML(item.id)}</strong>
               <span style="font-size:0.75rem; color:#8A8178;">${dateStr}</span>
@@ -854,35 +883,66 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
               ${item.notes ? `
                 <div class="inquiry-notes-preview">
                   <span><i class="fas fa-sticky-note"></i> <strong>Note:</strong> ${escapeHTML(item.notes)}</span>
-                  <button type="button" onclick="openNoteModal('${escapeHTML(item.id)}')" style="background:none; border:none; cursor:pointer; color:#78350F; font-size:0.78rem; text-decoration:underline;">Edit</button>
+                  ${!isDeleted ? `<button type="button" onclick="openNoteModal('${escapeHTML(item.id)}')" style="background:none; border:none; cursor:pointer; color:#78350F; font-size:0.78rem; text-decoration:underline;">Edit</button>` : ''}
                 </div>
               ` : `
-                <button type="button" onclick="openNoteModal('${escapeHTML(item.id)}')" style="background:none; border:none; cursor:pointer; color:#9CA3AF; font-size:0.75rem; margin-top:4px; padding:0; display:inline-flex; align-items:center; gap:3px;">
-                  <i class="fas fa-plus-circle"></i> Add internal note
-                </button>
+                ${!isDeleted ? `
+                  <button type="button" onclick="openNoteModal('${escapeHTML(item.id)}')" style="background:none; border:none; cursor:pointer; color:#9CA3AF; font-size:0.75rem; margin-top:4px; padding:0; display:inline-flex; align-items:center; gap:3px;">
+                    <i class="fas fa-plus-circle"></i> Add internal note
+                  </button>
+                ` : ''}
               `}
             </td>
             <td>
-              <select class="status-badge-select ${statusCss}" onchange="updateInquiryStatus('${escapeHTML(item.id)}', this.value, this)">
-                <option value="New" ${curStatus === 'New' ? 'selected' : ''}>New</option>
-                <option value="Contacted" ${curStatus === 'Contacted' ? 'selected' : ''}>Contacted</option>
-                <option value="In Discussion" ${curStatus === 'In Discussion' ? 'selected' : ''}>In Discussion</option>
-                <option value="Resolved" ${curStatus === 'Resolved' ? 'selected' : ''}>Resolved</option>
-              </select>
+              ${isDeleted ? `
+                <span class="badge-pill" style="background:#FEE2E2; color:#991B1B; font-size:0.8rem; display:inline-flex; align-items:center; gap:4px;">
+                  <i class="fas fa-trash-alt"></i> Deleted (Archived in Supabase)
+                </span>
+              ` : `
+                <select class="status-badge-select ${statusCss}" onchange="updateInquiryStatus('${escapeHTML(item.id)}', this.value, this)">
+                  <option value="New" ${curStatus === 'New' ? 'selected' : ''}>New</option>
+                  <option value="Contacted" ${curStatus === 'Contacted' ? 'selected' : ''}>Contacted</option>
+                  <option value="In Discussion" ${curStatus === 'In Discussion' ? 'selected' : ''}>In Discussion</option>
+                  <option value="Resolved" ${curStatus === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                </select>
+              `}
             </td>
             <td style="text-align: right;">
               <div class="action-btn-group" style="justify-content: flex-end;">
-                <a href="https://wa.me/${waPhone}?text=${waText}" target="_blank" class="btn-action btn-action-wa" title="Reply on WhatsApp">
-                  <i class="fab fa-whatsapp"></i> Chat
-                </a>
-                <button type="button" class="btn-action btn-action-del" onclick="deleteInquiryRow('${escapeHTML(item.id)}')" title="Delete inquiry record">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
+                ${isDeleted ? `
+                  <button type="button" class="btn-action" style="background:#059669; color:#fff;" onclick="restoreInquiryRow('${escapeHTML(item.id)}')" title="Restore inquiry back to active leads">
+                    <i class="fas fa-undo"></i> Restore
+                  </button>
+                ` : `
+                  <a href="https://wa.me/${waPhone}?text=${waText}" target="_blank" class="btn-action btn-action-wa" title="Reply on WhatsApp">
+                    <i class="fab fa-whatsapp"></i> Chat
+                  </a>
+                  <button type="button" class="btn-action btn-action-del" onclick="deleteInquiryRow('${escapeHTML(item.id)}')" title="Archive / Delete inquiry">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                `}
               </div>
             </td>
           </tr>
         `;
       }).join('');
+    }
+
+    // --- Restore Inquiry from Deleted Archive ---
+    async function restoreInquiryRow(id) {
+      allInquiries = allInquiries.map(i => i.id === id ? { ...i, status: 'New' } : i);
+      updateStatCards();
+      applyFilters();
+
+      try {
+        await fetch('/api/inquiries', {
+          method: 'PATCH',
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ id, status: 'New', notes: 'Restored by owner from deleted archive' })
+        });
+      } catch (err) {
+        console.warn('Backend restore failed:', err);
+      }
     }
 
     // --- Status Update (Synchronizes to Supabase) ---
@@ -1059,35 +1119,310 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
       alert('The complete SQL schema is saved in your project root at "supabase-schema.sql". You can open it in any editor and paste it directly into Supabase SQL Editor.');
     }
 
-    // --- Export to CSV ---
+    // --- Format Date to Indian Standard Time (IST) ---
+    function formatDateIST(isoStr) {
+      if (!isoStr) return 'N/A';
+      const d = new Date(isoStr);
+      if (isNaN(d.getTime())) return isoStr;
+      return d.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    }
+
+    // --- Clean, Human-Readable CSV Exporter ---
     function exportToCSV() {
       if (!allInquiries || allInquiries.length === 0) {
         alert('No inquiries to export.');
         return;
       }
 
-      const headers = ['Inquiry ID', 'Date & Time', 'Customer Name', 'Phone', 'Email', 'Inquiry Type', 'Subject', 'Message', 'Status', 'Internal Notes'];
-      const rows = allInquiries.map(i => [
-        i.id,
-        i.receivedAt || '',
-        `"${(i.name || '').replace(/"/g, '""')}"`,
-        `"${(i.phone || '').replace(/"/g, '""')}"`,
-        `"${(i.email || '').replace(/"/g, '""')}"`,
-        `"${(i.inquiryType || '').replace(/"/g, '""')}"`,
-        `"${(i.subject || '').replace(/"/g, '""')}"`,
-        `"${(i.message || '').replace(/"/g, '""')}"`,
-        `"${(i.status || 'New').replace(/"/g, '""')}"`,
-        `"${(i.notes || '').replace(/"/g, '""')}"`
-      ]);
+      // Column Headers
+      const headers = [
+        'Inquiry Ref ID',
+        'Date & Time (IST)',
+        'Customer Name',
+        'Mobile Phone',
+        'Email Address',
+        'Inquiry Category',
+        'Subject',
+        'Customer Requirement / Message',
+        'Lead Status',
+        'Internal CRM Notes'
+      ];
 
-      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-      const encodedUri = encodeURI(csvContent);
+      const rows = allInquiries.map(i => {
+        const cleanMsg = (i.message || '').replace(/[\r\n]+/g, ' ').replace(/"/g, '""');
+        const cleanSubject = (i.subject || '').replace(/"/g, '""');
+        const cleanNotes = (i.notes || '').replace(/[\r\n]+/g, ' ').replace(/"/g, '""');
+        const cleanName = (i.name || '').replace(/"/g, '""');
+        const formattedDate = formatDateIST(i.receivedAt);
+
+        return [
+          `"${i.id}"`,
+          `"${formattedDate}"`,
+          `"${cleanName}"`,
+          `"${i.phone || ''}"`,
+          `"${i.email || ''}"`,
+          `"${i.inquiryType || 'General Inquiry'}"`,
+          `"${cleanSubject}"`,
+          `"${cleanMsg}"`,
+          `"${i.status || 'New'}"`,
+          `"${cleanNotes}"`
+        ];
+      });
+
+      // Include UTF-8 BOM (\uFEFF) so Excel, LibreOffice & Notepad open with proper columns immediately
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+
       const link = document.createElement('a');
-      link.setAttribute('href', encodedUri);
-      link.setAttribute('download', `subhadarshini-leads-${new Date().toISOString().slice(0,10)}.csv`);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `Subhadarshini-Leads-Report-${new Date().toISOString().slice(0,10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    // --- Executive PDF Report Generator (Prints/Saves to PDF directly) ---
+    function generateExecutivePDFReport() {
+      if (!allInquiries || allInquiries.length === 0) {
+        alert('No customer inquiries to include in the report.');
+        return;
+      }
+
+      const activeLeads = allInquiries.filter(i => (i.status || '').toLowerCase() !== 'deleted');
+      const newLeads = activeLeads.filter(i => (i.status || 'New').toLowerCase() === 'new');
+      const contactedLeads = activeLeads.filter(i => ['contacted', 'in discussion'].includes((i.status || '').toLowerCase()));
+      const resolvedLeads = activeLeads.filter(i => (i.status || '').toLowerCase() === 'resolved');
+      const deletedLeads = allInquiries.filter(i => (i.status || '').toLowerCase() === 'deleted');
+
+      const generatedOn = new Date().toLocaleString('en-IN', {
+        dateStyle: 'full',
+        timeStyle: 'medium'
+      });
+
+      const reportHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Subhadarshini Spices - Executive Lead & Inquiry Report</title>
+  <style>
+    @page { size: A4 portrait; margin: 12mm 15mm; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #181512; margin: 0; padding: 20px; font-size: 11pt; line-height: 1.4; }
+    .report-header { border-bottom: 3px solid #D9531E; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .brand-title { font-size: 18pt; font-weight: 800; color: #D9531E; margin: 0 0 3px; letter-spacing: -0.02em; }
+    .brand-sub { font-size: 8.5pt; color: #574F47; margin: 0; line-height: 1.4; }
+    .meta-box { text-align: right; font-size: 8.5pt; color: #786E64; }
+    .meta-box strong { color: #181512; }
+    
+    .kpi-grid { display: flex; gap: 10px; margin-bottom: 20px; }
+    .kpi-card { flex: 1; border: 1px solid #E5E0D8; border-radius: 8px; padding: 10px; background: #FAF8F5; text-align: center; }
+    .kpi-val { font-size: 16pt; font-weight: 800; color: #181512; margin-bottom: 2px; }
+    .kpi-lbl { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; color: #786E64; letter-spacing: 0.04em; }
+
+    .section-title { font-size: 12pt; font-weight: 800; margin: 20px 0 8px; color: #181512; border-bottom: 1.5px solid #E5E0D8; padding-bottom: 4px; display: flex; justify-content: space-between; }
+    .section-title span { font-size: 9pt; font-weight: normal; color: #786E64; }
+
+    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 8.5pt; }
+    th { background: #F4F1EA; color: #574F47; font-weight: 700; text-transform: uppercase; padding: 7px 9px; border: 1px solid #E5E0D8; text-align: left; }
+    td { padding: 7px 9px; border: 1px solid #E5E0D8; vertical-align: top; }
+    tr:nth-child(even) { background: #FCFBF9; }
+
+    .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 7.5pt; font-weight: 700; }
+    .badge-new { background: #FEE2E2; color: #991B1B; }
+    .badge-contacted { background: #FEF3C7; color: #92400E; }
+    .badge-resolved { background: #DCFCE7; color: #166534; }
+    .badge-deleted { background: #F3F4F6; color: #4B5563; text-decoration: line-through; }
+
+    .no-print-toolbar { position: fixed; top: 12px; right: 16px; display: flex; gap: 8px; background: #fff; padding: 8px 12px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 1px solid #ddd; z-index: 1000; }
+    .btn-print { background: #D9531E; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 9pt; }
+    .btn-close { background: #6B7280; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 9pt; }
+
+    @media print {
+      .no-print-toolbar { display: none !important; }
+      body { padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="no-print-toolbar">
+    <button class="btn-print" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    <button class="btn-close" onclick="window.close()">Close Window</button>
+  </div>
+
+  <div class="report-header">
+    <div>
+      <h1 class="brand-title">SUBHADARSHINI SPICES</h1>
+      <p class="brand-sub">
+        <strong>Subhadarshini Agro Pvt Ltd</strong> • Corporate Office: Nayapalli, Bhubaneswar - 751015<br>
+        Manufacturing Plant: Sendapur, Godisahi, Cuttack - 754005, Odisha<br>
+        Customer Care: +91 6372585804 • care@subhadarshini.com • subhadarshini.com
+      </p>
+    </div>
+    <div class="meta-box">
+      <strong>OFFICIAL LEAD REPORT</strong><br>
+      Generated: ${generatedOn}<br>
+      Database: <strong>Supabase Cloud</strong>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-val">${allInquiries.length}</div>
+      <div class="kpi-lbl">Total Registered</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid #DC2626;">
+      <div class="kpi-val" style="color:#DC2626;">${newLeads.length}</div>
+      <div class="kpi-lbl">New Leads</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid #D97706;">
+      <div class="kpi-val" style="color:#D97706;">${contactedLeads.length}</div>
+      <div class="kpi-lbl">In Discussion</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid #16A34A;">
+      <div class="kpi-val" style="color:#16A34A;">${resolvedLeads.length}</div>
+      <div class="kpi-lbl">Resolved / Closed</div>
+    </div>
+    <div class="kpi-card" style="border-top: 3px solid #6B7280;">
+      <div class="kpi-val" style="color:#6B7280;">${deletedLeads.length}</div>
+      <div class="kpi-lbl">Deleted in Supabase</div>
+    </div>
+  </div>
+
+  <!-- Section 1: Active Leads -->
+  <div class="section-title">
+    1. Active Commercial Inquiries & Distributorship Leads (${newLeads.length + contactedLeads.length})
+    <span>Pending follow-up or discussions in progress</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:75px;">Ref ID</th>
+        <th style="width:95px;">Date (IST)</th>
+        <th style="width:110px;">Customer Name</th>
+        <th style="width:95px;">Phone</th>
+        <th style="width:110px;">Inquiry Type</th>
+        <th>Requirement / Discussion Subject</th>
+        <th style="width:75px;">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${[...newLeads, ...contactedLeads].map(i => `
+        <tr>
+          <td><strong>#${i.id}</strong></td>
+          <td>${formatDateIST(i.receivedAt)}</td>
+          <td><strong>${escapeHTML(i.name)}</strong></td>
+          <td>${escapeHTML(i.phone)}</td>
+          <td>${escapeHTML(i.inquiryType || 'General')}</td>
+          <td>
+            <strong>${escapeHTML(i.subject || '')}</strong><br>
+            <span style="color:#574F47;">${escapeHTML(i.message || '')}</span>
+            ${i.notes ? `<div style="margin-top:4px; color:#B45309; font-weight:600;">Note: ${escapeHTML(i.notes)}</div>` : ''}
+          </td>
+          <td><span class="badge ${i.status === 'New' ? 'badge-new' : 'badge-contacted'}">${i.status || 'New'}</span></td>
+        </tr>
+      `).join('') || '<tr><td colspan="7" style="text-align:center; color:#888;">No active pending leads.</td></tr>'}
+    </tbody>
+  </table>
+
+  <!-- Section 2: Resolved Leads -->
+  <div class="section-title">
+    2. Resolved Deals & Completed Requirements (${resolvedLeads.length})
+    <span>Successfully processed and closed orders</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:75px;">Ref ID</th>
+        <th style="width:95px;">Date</th>
+        <th style="width:120px;">Customer Name</th>
+        <th style="width:95px;">Phone</th>
+        <th>Fulfillment Details / Outcome</th>
+        <th style="width:85px;">Final Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${resolvedLeads.map(i => `
+        <tr>
+          <td><strong>#${i.id}</strong></td>
+          <td>${formatDateIST(i.receivedAt)}</td>
+          <td><strong>${escapeHTML(i.name)}</strong></td>
+          <td>${escapeHTML(i.phone)}</td>
+          <td>
+            <strong>${escapeHTML(i.subject || '')}</strong>: ${escapeHTML(i.message || '')}
+            ${i.notes ? `<div style="margin-top:3px; color:#166534; font-weight:600;">Closing Note: ${escapeHTML(i.notes)}</div>` : ''}
+          </td>
+          <td><span class="badge badge-resolved">Resolved</span></td>
+        </tr>
+      `).join('') || '<tr><td colspan="6" style="text-align:center; color:#888;">No resolved leads recorded yet.</td></tr>'}
+    </tbody>
+  </table>
+
+  <!-- Section 3: Deleted / Archived Records in Supabase -->
+  <div class="section-title">
+    3. Deleted & Archived Inquiries Audit Trail (${deletedLeads.length})
+    <span>Preserved safely in Supabase database for record-keeping</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:75px;">Ref ID</th>
+        <th style="width:95px;">Original Date</th>
+        <th style="width:120px;">Customer Name</th>
+        <th style="width:95px;">Phone</th>
+        <th>Original Requirement</th>
+        <th style="width:110px;">Archive Details</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${deletedLeads.map(i => `
+        <tr style="background:#FAF8F5;">
+          <td><span style="text-decoration:line-through; color:#888;">#${i.id}</span></td>
+          <td>${formatDateIST(i.receivedAt)}</td>
+          <td>${escapeHTML(i.name)}</td>
+          <td>${escapeHTML(i.phone)}</td>
+          <td>
+            ${escapeHTML(i.subject || '')} - <span style="color:#786E64;">${escapeHTML(i.message || '')}</span>
+          </td>
+          <td>
+            <span class="badge badge-deleted">Deleted</span><br>
+            <span style="font-size:7pt; color:#6B7280;">${escapeHTML(i.notes || 'Archived in Supabase')}</span>
+          </td>
+        </tr>
+      `).join('') || '<tr><td colspan="6" style="text-align:center; color:#888;">No deleted records in database.</td></tr>'}
+    </tbody>
+  </table>
+
+  <div style="margin-top:25px; border-top:1px solid #E5E0D8; padding-top:10px; font-size:7.5pt; color:#786E64; display:flex; justify-content:space-between;">
+    <span>Confidential • Subhadarshini Agro Pvt Ltd Commercial Management Record</span>
+    <span>Generated via Owner Portal • Supabase Cloud Synchronization</span>
+  </div>
+
+</body>
+</html>
+      `;
+
+      const printWindow = window.open('', '_blank', 'width=980,height=800');
+      if (printWindow) {
+        printWindow.document.open();
+        printWindow.document.write(reportHtml);
+        printWindow.document.close();
+        setTimeout(() => {
+          printWindow.focus();
+        }, 300);
+      } else {
+        alert('Popup blocker prevented opening report window. Please allow popups for this site.');
+      }
     }
 
     // --- Credentials Management ---
