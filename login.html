@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Sign In & Registration | Subhadarshini Spices</title>
+  <meta name="description" content="Sign in or create your personal Subhadarshini Spices account to manage your spice basket, view individual pack pricing, and order direct.">
+  
+  <link rel="icon" type="image/png" href="assets/images/logo/logo.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/style.css?v=4.1">
+
+  <style>
+    .login-page-section {
+      min-height: calc(100vh - 160px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 1rem;
+      background: radial-gradient(circle at 50% 30%, rgba(217, 83, 30, 0.08) 0%, transparent 70%), var(--light-parchment);
+    }
+    .auth-card-box {
+      width: 100%;
+      max-width: 460px;
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2rem;
+      box-shadow: var(--shadow-xl);
+      border: 1px solid var(--gray-200);
+      text-align: center;
+      position: relative;
+    }
+    .auth-card-logo {
+      height: 52px;
+      margin: 0 auto 1.25rem;
+    }
+    .auth-card-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--dark-900);
+      margin-bottom: 0.35rem;
+    }
+    .auth-card-subtitle {
+      font-size: 0.92rem;
+      color: var(--gray-600);
+      margin-bottom: 1.75rem;
+    }
+    .auth-page-tabs {
+      display: flex;
+      background: var(--gray-100);
+      border-radius: var(--radius-full);
+      padding: 4px;
+      margin-bottom: 1.5rem;
+    }
+    .auth-page-tab {
+      flex: 1;
+      padding: 0.6rem 1rem;
+      border: none;
+      background: transparent;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--dark-700);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .auth-page-tab.active {
+      background: var(--white);
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+    .auth-page-form {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .auth-page-form label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--dark-800);
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .auth-page-form input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 0.92rem;
+      border: 1.5px solid var(--gray-300);
+      border-radius: var(--radius-sm);
+      background: var(--light-parchment);
+      color: var(--dark-900);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .auth-page-form input:focus {
+      border-color: var(--primary);
+      background: var(--white);
+      box-shadow: 0 0 0 3px rgba(217, 83, 30, 0.15);
+    }
+    .auth-msg-alert {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.86rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      text-align: left;
+    }
+    .auth-msg-alert.error {
+      background: rgba(186, 24, 27, 0.08);
+      color: var(--accent-crimson);
+      border: 1px solid rgba(186, 24, 27, 0.2);
+    }
+    .auth-msg-alert.success {
+      background: var(--accent-green-soft);
+      color: var(--accent-green);
+      border: 1px solid rgba(30, 89, 54, 0.2);
+    }
+    .auth-perks-box {
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--gray-200);
+      font-size: 0.82rem;
+      color: var(--gray-500);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Info Bar -->
+  <div class="top-bar">
+    <div class="container">
+      <div class="top-bar-left">
+        <a href="tel:+916372585804"><i class="fas fa-phone-alt"></i> +91 6372585804</a>
+        <a href="mailto:care@subhadarshini.com"><i class="fas fa-envelope"></i> care@subhadarshini.com</a>
+      </div>
+      <div class="top-bar-right">
+        <span><i class="fas fa-shield-alt"></i> 100% Contamination-Free Tested Batches</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo-link">
+        <img src="assets/images/logo/logo.png" alt="Subhadarshini Spices" class="logo-img">
+      </a>
+
+      <nav class="nav-menu">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="about.html" class="nav-link">About Us</a>
+        <a href="products.html" class="nav-link">Our Spices</a>
+        <a href="recipes.html" class="nav-link">Signature Recipes</a>
+        <a href="team.html" class="nav-link">Our Team</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="cart-nav-btn" onclick="CartManager.openCart()" aria-label="View Shopping Basket" title="View Spice Basket">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="cart-nav-badge" id="cartBadge">0</span>
+        </button>
+        <a href="https://wa.me/916372585804" target="_blank" class="btn btn-whatsapp btn-sm">
+          <i class="fab fa-whatsapp"></i> WhatsApp Order
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Login / Register Section -->
+  <main class="login-page-section">
+    <div class="auth-card-box">
+      <img src="assets/images/logo/logo.png" alt="Subhadarshini Spices" class="auth-card-logo">
+      <h1 class="auth-card-title" id="pageAuthTitle">Welcome Back</h1>
+      <p class="auth-card-subtitle" id="pageAuthSubtitle">Sign in to access your personal spice basket and order authentic spices.</p>
+
+      <!-- Tabs -->
+      <div class="auth-page-tabs">
+        <button type="button" class="auth-page-tab active" id="btnPageTabSignIn">Sign In</button>
+        <button type="button" class="auth-page-tab" id="btnPageTabRegister">Create Account</button>
+      </div>
+
+      <!-- Feedback alert -->
+      <div id="pageAuthAlert" class="auth-msg-alert error" style="display: none;"></div>
+
+      <!-- Sign In Form -->
+      <form id="pageSignInForm" class="auth-page-form">
+        <div>
+          <label for="pageSignInPhone"><i class="fas fa-phone-alt"></i> 10-Digit Mobile Number *</label>
+          <input type="tel" id="pageSignInPhone" placeholder="e.g. 9876543210" maxlength="10" required pattern="[0-9]{10}">
+        </div>
+        <div>
+          <label for="pageSignInPass"><i class="fas fa-lock"></i> Password / PIN *</label>
+          <input type="password" id="pageSignInPass" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" style="padding: 0.85rem; font-size: 1rem; margin-top: 0.5rem;">
+          <i class="fas fa-right-to-bracket"></i> Sign In to My Account
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="pageRegisterForm" class="auth-page-form" style="display: none;">
+        <div>
+          <label for="pageRegName"><i class="fas fa-user"></i> Full Name *</label>
+          <input type="text" id="pageRegName" placeholder="e.g. Priyadarshini Mohanty" required>
+        </div>
+        <div>
+          <label for="pageRegPhone"><i class="fas fa-phone-alt"></i> 10-Digit Mobile Number *</label>
+          <input type="tel" id="pageRegPhone" placeholder="e.g. 9876543210" maxlength="10" required pattern="[0-9]{10}">
+        </div>
+        <div>
+          <label for="pageRegCity"><i class="fas fa-location-dot"></i> City / Town (Optional)</label>
+          <input type="text" id="pageRegCity" placeholder="e.g. Bhubaneswar, Cuttack">
+        </div>
+        <div>
+          <label for="pageRegPass"><i class="fas fa-lock"></i> Create Password *</label>
+          <input type="password" id="pageRegPass" placeholder="At least 4 characters" minlength="4" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" style="padding: 0.85rem; font-size: 1rem; margin-top: 0.5rem;">
+          <i class="fas fa-user-plus"></i> Create Account & Proceed
+        </button>
+      </form>
+
+      <div class="auth-perks-box">
+        <p><i class="fas fa-circle-check" style="color:var(--accent-green);"></i> Individual client basket saved securely</p>
+        <p><i class="fas fa-circle-check" style="color:var(--accent-green);"></i> 1-Click WhatsApp orders with exact items</p>
+      </div>
+
+      <div style="margin-top: 1.25rem;">
+        <a href="products.html" style="color: var(--primary); font-size: 0.88rem; font-weight: 700; text-decoration: none;">
+          <i class="fas fa-arrow-left"></i> Return to Spice Catalog
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom" style="border:none; padding:1.5rem 0;">
+        <p>&copy; 2024–2026 Subhadarshini Agro Pvt Ltd. All Rights Reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/products-data.js?v=4.0"></script>
+  <script src="assets/js/customer-auth.js?v=4.0"></script>
+  <script src="assets/js/cart.js?v=4.0"></script>
+  <script src="assets/js/main.js?v=4.0"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabSignIn = document.getElementById('btnPageTabSignIn');
+      const tabReg = document.getElementById('btnPageTabRegister');
+      const formSignIn = document.getElementById('pageSignInForm');
+      const formReg = document.getElementById('pageRegisterForm');
+      const alertBox = document.getElementById('pageAuthAlert');
+      const title = document.getElementById('pageAuthTitle');
+      const subtitle = document.getElementById('pageAuthSubtitle');
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlParams.get('redirect') || 'products.html';
+
+      // If user is already logged in, redirect them
+      if (window.CustomerAuth && window.CustomerAuth.isLoggedIn()) {
+        window.location.href = redirectUrl;
+        return;
+      }
+
+      tabSignIn.addEventListener('click', () => {
+        tabSignIn.classList.add('active');
+        tabReg.classList.remove('active');
+        formSignIn.style.display = 'flex';
+        formReg.style.display = 'none';
+        title.textContent = 'Welcome Back';
+        subtitle.textContent = 'Sign in to access your personal spice basket and order authentic spices.';
+        alertBox.style.display = 'none';
+      });
+
+      tabReg.addEventListener('click', () => {
+        tabReg.classList.add('active');
+        tabSignIn.classList.remove('active');
+        formSignIn.style.display = 'none';
+        formReg.style.display = 'flex';
+        title.textContent = 'Create Customer Account';
+        subtitle.textContent = 'Create your account to start adding authentic Odisha spices to your basket.';
+        alertBox.style.display = 'none';
+      });
+
+      function showAlert(msg, isSuccess = false) {
+        alertBox.className = 'auth-msg-alert ' + (isSuccess ? 'success' : 'error');
+        alertBox.textContent = msg;
+        alertBox.style.display = 'block';
+      }
+
+      formSignIn.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const phone = document.getElementById('pageSignInPhone').value;
+        const pass = document.getElementById('pageSignInPass').value;
+        const res = window.CustomerAuth.login(phone, pass);
+        if (res.success) {
+          showAlert(`Welcome, ${res.user.name}! Redirecting...`, true);
+          setTimeout(() => {
+            window.location.href = redirectUrl;
+          }, 600);
+        } else {
+          showAlert(res.error);
+        }
+      });
+
+      formReg.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('pageRegName').value;
+        const phone = document.getElementById('pageRegPhone').value;
+        const city = document.getElementById('pageRegCity').value;
+        const pass = document.getElementById('pageRegPass').value;
+        const res = window.CustomerAuth.register(name, phone, pass, city);
+        if (res.success) {
+          showAlert(`Account created for ${res.user.name}! Redirecting...`, true);
+          setTimeout(() => {
+            window.location.href = redirectUrl;
+          }, 600);
+        } else {
+          showAlert(res.error);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

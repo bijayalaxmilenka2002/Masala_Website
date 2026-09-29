@@ -212,7 +212,43 @@ function initProductCatalog() {
   }
 
   renderProducts();
+  updateAllCardCartBadges();
+
+  window.removeEventListener('cart:updated', updateAllCardCartBadges);
+  window.addEventListener('cart:updated', updateAllCardCartBadges);
 }
+
+function updateAllCardCartBadges() {
+  if (typeof PRODUCTS_DATA === 'undefined') return;
+  PRODUCTS_DATA.forEach(p => {
+    if (window.updateCardCartBadge) {
+      window.updateCardCartBadge(p.id);
+    }
+  });
+}
+
+window.updateCardCartBadge = function(productId) {
+  const card = document.getElementById(`card-${productId}`);
+  if (!card || typeof PRODUCTS_DATA === 'undefined' || typeof CartManager === 'undefined') return;
+  const product = PRODUCTS_DATA.find(p => p.id === productId);
+  if (!product || !product.variants) return;
+  const variantIndex = parseInt(card.dataset.selectedVariant, 10) || 0;
+  const variant = product.variants[variantIndex] || product.variants[0];
+  const qty = CartManager.getItemQuantity(productId, variant.weight);
+
+  const addBtn = card.querySelector('.btn-card-add');
+  if (addBtn) {
+    if (qty > 0) {
+      addBtn.innerHTML = `<i class="fas fa-shopping-bag"></i> ${qty} in Basket (+)`;
+      addBtn.classList.add('has-cart-qty');
+      addBtn.title = `${qty} pack(s) in basket. Click to add another`;
+    } else {
+      addBtn.innerHTML = `<i class="fas fa-cart-plus"></i> Add`;
+      addBtn.classList.remove('has-cart-qty');
+      addBtn.title = `Add ${variant.weight} to Basket`;
+    }
+  }
+};
 
 // Global function to handle variant pack selection directly on product cards
 window.selectCardVariant = function(productId, variantIndex, event) {
@@ -259,6 +295,11 @@ window.selectCardVariant = function(productId, variantIndex, event) {
   if (orderBtn) {
     const waText = encodeURIComponent(`Hello Subhadarshini Spices, I want to order ${product.name} (${variant.weight} - ₹${variant.price}).`);
     orderBtn.href = `https://wa.me/916372585804?text=${waText}`;
+  }
+
+  // Also update visible card quantity badge for this variant!
+  if (window.updateCardCartBadge) {
+    window.updateCardCartBadge(productId);
   }
 };
 

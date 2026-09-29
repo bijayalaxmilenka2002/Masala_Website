@@ -1,13 +1,12 @@
 /**
  * SUBHADARSHINI SPICES - SHOPPING BASKET & CART CONTROLLER
- * Full-featured e-commerce cart with persistent storage, slide-out drawer,
+ * Full-featured e-commerce cart with persistent per-user storage, slide-out drawer,
  * variant support, free shipping meter, direct WhatsApp checkout, and online order placement.
  */
 
 (function (window, document) {
   'use strict';
 
-  const STORAGE_KEY = 'subhadarshini_cart_v1';
   const FREE_SHIPPING_THRESHOLD = 499; // Free delivery above ₹499
   const STANDARD_DELIVERY_FEE = 40;    // Standard delivery fee
 
@@ -20,12 +19,30 @@
       this.bindEvents();
       this.updateBadges();
       this.renderDrawer();
+
+      // Listen for user sign-in / sign-out to switch to individual client cart
+      window.addEventListener('auth:user-changed', () => {
+        this.loadCart();
+        this.updateBadges();
+        this.renderDrawer();
+        window.dispatchEvent(new CustomEvent('cart:updated', { detail: { items: this.items } }));
+      });
+    },
+
+    // --- Dynamic Per-Client Storage Key ---
+    getStorageKey() {
+      const user = window.CustomerAuth ? window.CustomerAuth.getCurrentUser() : null;
+      if (user && user.phone) {
+        return `subhadarshini_cart_${user.phone}`;
+      }
+      return 'subhadarshini_cart_guest';
     },
 
     // --- Local Storage Management ---
     loadCart() {
       try {
-        const stored = localStorage.getItem(STORAGE_KEY);
+        const key = this.getStorageKey();
+        const stored = localStorage.getItem(key);
         this.items = stored ? JSON.parse(stored) : [];
         if (!Array.isArray(this.items)) this.items = [];
       } catch (err) {
@@ -36,7 +53,8 @@
 
     saveCart() {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.items));
+        const key = this.getStorageKey();
+        localStorage.setItem(key, JSON.stringify(this.items));
       } catch (err) {
         console.warn('Failed to save cart to localStorage:', err);
       }
@@ -45,8 +63,32 @@
       window.dispatchEvent(new CustomEvent('cart:updated', { detail: { items: this.items } }));
     },
 
+    // --- Query item quantity for card buttons & indicators ---
+    getItemQuantity(productId, variantWeight) {
+      if (!this.items || this.items.length === 0) return 0;
+      if (variantWeight) {
+        const item = this.items.find(it => it.productId === productId && it.weight === variantWeight);
+        return item ? item.quantity : 0;
+      }
+      return this.items
+        .filter(it => it.productId === productId)
+        .reduce((sum, it) => sum + it.quantity, 0);
+    },
+
     // --- Cart Actions ---
     addItem(productId, variantIndex = 0, quantity = 1, options = {}) {
+      // 1. Mandatory Sign In / Registration Gate
+      if (!window.CustomerAuth || !window.CustomerAuth.isLoggedIn()) {
+        const product = (typeof PRODUCTS_DATA !== 'undefined') ? PRODUCTS_DATA.find(p => p.id === productId) : null;
+        const prodName = product ? product.name : 'this spice';
+        
+        window.CustomerAuth.requireAuth({
+          reason: `Please sign in or create an account to add ${prodName} to your personal basket.`,
+          pendingAction: { productId, variantIndex, quantity }
+        });
+        return false;
+      }
+
       if (typeof PRODUCTS_DATA === 'undefined') return false;
       const product = PRODUCTS_DATA.find(p => p.id === productId);
       if (!product) return false;
@@ -85,9 +127,8 @@
         this.animateBadge();
       }
 
-      if (options.openDrawer) {
-        this.openCart();
-      }
+      // Per user requirement: immediately slide open the cart drawer so client can see the products!
+      this.openCart();
 
       return true;
     },
@@ -98,8 +139,8 @@
 
       this.items[index].quantity += delta;
       if (this.items[index].quantity <= 0) {
-        this.items.splice(index, 1);
-        this.showToast('Item removed from your basket');
+        const removed = this.items.splice(index, 1)[0];
+        this.showToast(`Removed <strong>${removed.name}</strong> from your basket`);
       }
       this.saveCart();
     },
@@ -172,6 +213,9 @@
     // --- Slide-out Drawer DOM & Mounting ---
     ensureDrawerDOM() {
       if (document.getElementById('cartDrawer')) return;
+
+      const user = window.CustomerAuth ? window.CustomerAuth.getCurrentUser() : null;
+      const clientName = user ? user.name : 'Your';
 
       const drawerHTML = `
         <div class="cart-backdrop" id="cartBackdrop" aria-hidden="true"></div>
@@ -280,10 +324,10 @@
             </div>
 
             <div class="cart-footer-actions">
-              <button type="button" class="btn btn-whatsapp btn-block btn-cart-wa" id="btnCartWhatsAppCheckout">
-                <i class="fab fa-whatsapp"></i> Instant Order via WhatsApp
+              <button type="button" class="btn btn-whatsapp btn-block btn-cart-wa" id="btnCartWhatsAppCheckout" title="Order on WhatsApp with all cart products">
+                <i class="fab fa-whatsapp"></i> Order on WhatsApp (Redirect with Items)
               </button>
-              <button type="button" class="btn btn-primary btn-block btn-cart-checkout" id="btnCartShowCheckout">
+              <button type="button" class="btn btn-secondary btn-block btn-cart-checkout" id="btnCartShowCheckout">
                 <i class="fas fa-truck"></i> Enter Address & Order Direct
               </button>
             </div>
@@ -427,7 +471,7 @@
         return;
       }
 
-      // Active Items List
+      // Active Items List - shows each product, pack weight, price, and clear quantity (1, 2, 3)
       if (footer) footer.style.display = 'block';
 
       container.innerHTML = `
@@ -526,6 +570,15 @@
       if (footer) footer.style.display = 'none';
       if (checkoutView) checkoutView.style.display = 'block';
 
+      // Pre-fill user details if logged in
+      const user = window.CustomerAuth ? window.CustomerAuth.getCurrentUser() : null;
+      if (user) {
+        const nameField = document.getElementById('orderCustomerName');
+        const phoneField = document.getElementById('orderCustomerPhone');
+        if (nameField && !nameField.value) nameField.value = user.name || '';
+        if (phoneField && !phoneField.value) phoneField.value = user.phone || '';
+      }
+
       if (summaryBox) {
         summaryBox.innerHTML = `
           <div class="summary-line"><span>Items (${itemCount}):</span> <strong>₹${subtotal}</strong></div>
@@ -548,7 +601,7 @@
       this.renderDrawer();
     },
 
-    // --- Order Checkout via WhatsApp ---
+    // --- Order Checkout via WhatsApp: Redirects with full cart products ---
     checkoutViaWhatsApp() {
       if (this.items.length === 0) {
         this.showToast('Your basket is empty!');
@@ -556,13 +609,19 @@
       }
 
       const { subtotal, deliveryFee, grandTotal } = this.getTotals();
+      const user = window.CustomerAuth ? window.CustomerAuth.getCurrentUser() : null;
 
       let lines = [
         '🌿 *NEW SPICE ORDER - SUBHADARSHINI SPICES* 🌿',
-        '--------------------------------------------',
-        '*Ordered Items:*'
+        '--------------------------------------------'
       ];
 
+      if (user && user.name) {
+        lines.push(`*Customer:* ${user.name} (${user.phone})`);
+        lines.push('--------------------------------------------');
+      }
+
+      lines.push('*Ordered Items:*');
       this.items.forEach((item, index) => {
         lines.push(`${index + 1}. *${item.name}* (${item.weight}) x ${item.quantity} = ₹${item.price * item.quantity}`);
       });
@@ -615,7 +674,7 @@ ${this.items.map(it => `- ${it.name} (${it.weight}) x ${it.quantity} = ₹${it.p
       `.trim();
 
       try {
-        const response = await fetch('/api/contact', {
+        await fetch('/api/contact', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -628,9 +687,6 @@ ${this.items.map(it => `- ${it.name} (${it.weight}) x ${it.quantity} = ₹${it.p
           })
         });
 
-        const result = await response.json();
-
-        // Show Success screen even if offline/fallback
         this.showSuccessView(orderId, name, phone, grandTotal, itemsSummary);
         this.items = [];
         this.saveCart();
@@ -695,24 +751,14 @@ ${this.items.map(it => `- ${it.name} (${it.weight}) x ${it.quantity} = ₹${it.p
       event.preventDefault();
       event.stopPropagation();
     }
+
     const card = document.getElementById(`card-${productId}`);
     let variantIndex = 0;
     if (card && card.dataset.selectedVariant !== undefined) {
       variantIndex = parseInt(card.dataset.selectedVariant, 10) || 0;
     }
 
-    const added = CartManager.addItem(productId, variantIndex, 1);
-
-    if (added && event && event.currentTarget) {
-      const btn = event.currentTarget;
-      const originalHTML = btn.innerHTML;
-      btn.classList.add('btn-added-pulse');
-      btn.innerHTML = '<i class="fas fa-check"></i> Added!';
-      setTimeout(() => {
-        btn.classList.remove('btn-added-pulse');
-        btn.innerHTML = originalHTML;
-      }, 1400);
-    }
+    CartManager.addItem(productId, variantIndex, 1);
   };
 
   // Initialize on DOM ready

@@ -5,7 +5,7 @@ import json
 
 html_files = [
     'index.html', 'about.html', 'products.html', 'recipes.html',
-    'team.html', 'gallery.html', 'contact.html', 'inquiries.html', 'owner-login.html'
+    'team.html', 'gallery.html', 'contact.html', 'inquiries.html', 'owner-login.html', 'login.html'
 ]
 
 errors = []
