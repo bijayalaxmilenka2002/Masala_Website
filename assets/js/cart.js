@@ -1,14 +1,12 @@
 /**
  * SUBHADARSHINI SPICES - SHOPPING BASKET & CART CONTROLLER
  * Full-featured e-commerce cart with persistent per-user storage, slide-out drawer,
- * variant support, free shipping meter, direct WhatsApp checkout, and online order placement.
+ * variant support, and instant WhatsApp ordering for all products in the basket.
+ * (Orders are exclusively processed via WhatsApp).
  */
 
 (function (window, document) {
   'use strict';
-
-  const FREE_SHIPPING_THRESHOLD = 499; // Free delivery above ₹499
-  const STANDARD_DELIVERY_FEE = 40;    // Standard delivery fee
 
   const CartManager = {
     items: [],
@@ -127,7 +125,7 @@
         this.animateBadge();
       }
 
-      // Per user requirement: immediately slide open the cart drawer so client can see the products!
+      // Immediately slide open the cart drawer so client can see the products!
       this.openCart();
 
       return true;
@@ -171,19 +169,10 @@
         subtotal += item.price * item.quantity;
       });
 
-      const deliveryFee = subtotal === 0 ? 0 : (subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_DELIVERY_FEE);
-      const grandTotal = subtotal + deliveryFee;
-      const amountNeededForFree = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
-      const freeShippingPercent = Math.min(100, Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100));
-
       return {
         itemCount: count,
         subtotal,
-        deliveryFee,
-        grandTotal,
-        amountNeededForFree,
-        freeShippingPercent,
-        isFreeShipping: subtotal >= FREE_SHIPPING_THRESHOLD
+        grandTotal: subtotal
       };
     },
 
@@ -214,9 +203,6 @@
     ensureDrawerDOM() {
       if (document.getElementById('cartDrawer')) return;
 
-      const user = window.CustomerAuth ? window.CustomerAuth.getCurrentUser() : null;
-      const clientName = user ? user.name : 'Your';
-
       const drawerHTML = `
         <div class="cart-backdrop" id="cartBackdrop" aria-hidden="true"></div>
         <aside class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-labelledby="cartDrawerTitle">
@@ -232,107 +218,29 @@
             <button class="cart-close-btn" id="cartCloseBtn" aria-label="Close basket">&times;</button>
           </div>
 
-          <!-- Free Shipping Progress -->
-          <div class="cart-shipping-meter" id="cartShippingMeter">
-            <div class="shipping-meter-text" id="shippingMeterText">
-              <i class="fas fa-truck-fast"></i> Add ₹499 for FREE Delivery
-            </div>
-            <div class="shipping-meter-track">
-              <div class="shipping-meter-bar" id="shippingMeterBar" style="width: 0%;"></div>
-            </div>
-          </div>
-
           <!-- Cart Items View -->
           <div class="cart-drawer-body" id="cartItemsContainer">
             <!-- Dynamically populated -->
           </div>
 
-          <!-- Checkout / Form Subview (hidden by default) -->
-          <div class="cart-checkout-view" id="cartCheckoutView" style="display: none;">
-            <div class="checkout-view-header">
-              <button type="button" class="checkout-back-btn" id="checkoutBackBtn">
-                <i class="fas fa-arrow-left"></i> Back to Basket
-              </button>
-              <h4>Quick Delivery Details</h4>
-            </div>
-            <form id="cartCheckoutForm" class="cart-checkout-form">
-              <div class="form-group-sm">
-                <label for="orderCustomerName">Full Name *</label>
-                <input type="text" id="orderCustomerName" required placeholder="Enter full name">
-              </div>
-              <div class="form-row-sm">
-                <div class="form-group-sm">
-                  <label for="orderCustomerPhone">10-Digit Mobile *</label>
-                  <input type="tel" id="orderCustomerPhone" required placeholder="e.g. 9876543210" pattern="[0-9]{10}">
-                </div>
-                <div class="form-group-sm">
-                  <label for="orderCustomerPincode">Pincode *</label>
-                  <input type="text" id="orderCustomerPincode" required placeholder="e.g. 753001" maxlength="6">
-                </div>
-              </div>
-              <div class="form-group-sm">
-                <label for="orderCustomerAddress">Delivery Address *</label>
-                <textarea id="orderCustomerAddress" rows="2" required placeholder="House/Flat, Street, Landmark, City"></textarea>
-              </div>
-              <div class="form-group-sm">
-                <label for="orderPaymentMethod">Payment Mode</label>
-                <select id="orderPaymentMethod">
-                  <option value="Cash / Pay on Delivery">Cash / UPI on Delivery</option>
-                  <option value="Prepay via UPI / WhatsApp">Prepay via UPI QR / WhatsApp</option>
-                </select>
-              </div>
-              <div class="checkout-order-summary-box" id="checkoutFormSummary">
-                <!-- Summary inserted -->
-              </div>
-              <button type="submit" class="btn btn-primary btn-block" id="btnSubmitDirectOrder">
-                <i class="fas fa-check-circle"></i> Place Order Now
-              </button>
-            </form>
-          </div>
-
-          <!-- Order Confirmation View -->
-          <div class="cart-success-view" id="cartSuccessView" style="display: none;">
-            <div class="success-icon-wrap">
-              <i class="fas fa-check-circle"></i>
-            </div>
-            <h3>Order Received!</h3>
-            <p class="success-order-id" id="successOrderId">ID: SUB-ORD-0000</p>
-            <p class="success-order-desc">Thank you for choosing Subhadarshini Spices. We have received your order details and are preparing your fresh spice batch.</p>
-            <div class="success-actions">
-              <a href="#" target="_blank" class="btn btn-whatsapp btn-block" id="successWhatsAppBtn">
-                <i class="fab fa-whatsapp"></i> Confirm Order on WhatsApp
-              </a>
-              <button type="button" class="btn btn-secondary btn-block" id="successContinueBtn">
-                Continue Shopping
-              </button>
-            </div>
-          </div>
-
           <!-- Cart Drawer Footer -->
           <div class="cart-drawer-footer" id="cartDrawerFooter">
             <div class="cart-summary-line">
-              <span>Subtotal</span>
-              <strong id="cartSubtotal">₹0</strong>
-            </div>
-            <div class="cart-summary-line">
-              <span>Delivery Charges</span>
-              <span id="cartDeliveryFee" class="delivery-badge-val">₹0</span>
+              <span>Total Items</span>
+              <strong id="cartHeaderItemsCount">0</strong>
             </div>
             <div class="cart-summary-line cart-total-line">
-              <span>Total Amount</span>
+              <span>Estimated Order Value</span>
               <strong id="cartGrandTotal">₹0</strong>
             </div>
 
             <div class="cart-footer-actions">
               <button type="button" class="btn btn-whatsapp btn-block btn-cart-wa" id="btnCartWhatsAppCheckout" title="Order on WhatsApp with all cart products">
-                <i class="fab fa-whatsapp"></i> Order on WhatsApp (Redirect with Items)
-              </button>
-              <button type="button" class="btn btn-secondary btn-block btn-cart-checkout" id="btnCartShowCheckout">
-                <i class="fas fa-truck"></i> Enter Address & Order Direct
+                <i class="fab fa-whatsapp"></i> Order on WhatsApp (Send Items)
               </button>
             </div>
             <div class="cart-guarantee-note">
-              <i class="fas fa-shield-halved"></i> 100% Unadulterated Pure Spices • Fresh Batch Milling
+              <i class="fas fa-shield-halved"></i> 100% Contamination-Free Odisha Spices • Fresh Batch Milling
             </div>
           </div>
         </aside>
@@ -372,31 +280,6 @@
         waBtn.addEventListener('click', () => this.checkoutViaWhatsApp());
       }
 
-      // Show Direct Checkout Form
-      const showCheckoutBtn = document.getElementById('btnCartShowCheckout');
-      const backBtn = document.getElementById('checkoutBackBtn');
-      if (showCheckoutBtn) {
-        showCheckoutBtn.addEventListener('click', () => this.showCheckoutView());
-      }
-      if (backBtn) {
-        backBtn.addEventListener('click', () => this.showItemsView());
-      }
-
-      // Handle Direct Checkout Form Submission
-      const checkoutForm = document.getElementById('cartCheckoutForm');
-      if (checkoutForm) {
-        checkoutForm.addEventListener('submit', (e) => this.handleDirectOrderSubmit(e));
-      }
-
-      // Success continue shopping
-      const continueBtn = document.getElementById('successContinueBtn');
-      if (continueBtn) {
-        continueBtn.addEventListener('click', () => {
-          this.closeCart();
-          this.showItemsView();
-        });
-      }
-
       // Toast click to view cart
       const toastViewBtn = document.getElementById('toastViewCartBtn');
       if (toastViewBtn) {
@@ -420,37 +303,19 @@
     renderDrawer() {
       const container = document.getElementById('cartItemsContainer');
       const headerCount = document.getElementById('cartHeaderCount');
-      const subtotalEl = document.getElementById('cartSubtotal');
-      const deliveryEl = document.getElementById('cartDeliveryFee');
+      const itemsCountEl = document.getElementById('cartHeaderItemsCount');
       const grandTotalEl = document.getElementById('cartGrandTotal');
       const footer = document.getElementById('cartDrawerFooter');
-      const shippingMeter = document.getElementById('cartShippingMeter');
-      const meterText = document.getElementById('shippingMeterText');
-      const meterBar = document.getElementById('shippingMeterBar');
 
       if (!container) return;
 
-      const { itemCount, subtotal, deliveryFee, grandTotal, amountNeededForFree, freeShippingPercent, isFreeShipping } = this.getTotals();
+      const { itemCount, grandTotal } = this.getTotals();
 
       if (headerCount) {
         headerCount.textContent = `${itemCount} item${itemCount === 1 ? '' : 's'}`;
       }
-
-      // Free shipping progress
-      if (shippingMeter && meterText && meterBar) {
-        if (subtotal === 0) {
-          shippingMeter.style.display = 'none';
-        } else {
-          shippingMeter.style.display = 'block';
-          meterBar.style.width = `${freeShippingPercent}%`;
-          if (isFreeShipping) {
-            meterText.innerHTML = '<span class="free-ship-unlocked"><i class="fas fa-circle-check"></i> <strong>FREE Delivery Unlocked!</strong></span>';
-            meterBar.classList.add('unlocked');
-          } else {
-            meterText.innerHTML = `<i class="fas fa-truck-fast"></i> Add <strong>₹${amountNeededForFree}</strong> more for <strong>FREE Delivery</strong>`;
-            meterBar.classList.remove('unlocked');
-          }
-        }
+      if (itemsCountEl) {
+        itemsCountEl.textContent = `${itemCount} pack${itemCount === 1 ? '' : 's'}`;
       }
 
       // Empty State
@@ -513,14 +378,6 @@
         </div>
       `;
 
-      if (subtotalEl) subtotalEl.textContent = `₹${subtotal}`;
-      if (deliveryEl) {
-        if (deliveryFee === 0) {
-          deliveryEl.innerHTML = '<span class="free-delivery-tag">FREE</span>';
-        } else {
-          deliveryEl.textContent = `₹${deliveryFee}`;
-        }
-      }
       if (grandTotalEl) grandTotalEl.textContent = `₹${grandTotal}`;
     },
 
@@ -559,48 +416,6 @@
       return drawer && drawer.classList.contains('open');
     },
 
-    showCheckoutView() {
-      const itemsContainer = document.getElementById('cartItemsContainer');
-      const checkoutView = document.getElementById('cartCheckoutView');
-      const footer = document.getElementById('cartDrawerFooter');
-      const summaryBox = document.getElementById('checkoutFormSummary');
-      const { itemCount, subtotal, deliveryFee, grandTotal } = this.getTotals();
-
-      if (itemsContainer) itemsContainer.style.display = 'none';
-      if (footer) footer.style.display = 'none';
-      if (checkoutView) checkoutView.style.display = 'block';
-
-      // Pre-fill user details if logged in
-      const user = window.CustomerAuth ? window.CustomerAuth.getCurrentUser() : null;
-      if (user) {
-        const nameField = document.getElementById('orderCustomerName');
-        const phoneField = document.getElementById('orderCustomerPhone');
-        if (nameField && !nameField.value) nameField.value = user.name || '';
-        if (phoneField && !phoneField.value) phoneField.value = user.phone || '';
-      }
-
-      if (summaryBox) {
-        summaryBox.innerHTML = `
-          <div class="summary-line"><span>Items (${itemCount}):</span> <strong>₹${subtotal}</strong></div>
-          <div class="summary-line"><span>Delivery:</span> <strong>${deliveryFee === 0 ? 'FREE' : '₹' + deliveryFee}</strong></div>
-          <div class="summary-line total"><span>Total Payable:</span> <strong>₹${grandTotal}</strong></div>
-        `;
-      }
-    },
-
-    showItemsView() {
-      const itemsContainer = document.getElementById('cartItemsContainer');
-      const checkoutView = document.getElementById('cartCheckoutView');
-      const successView = document.getElementById('cartSuccessView');
-      const footer = document.getElementById('cartDrawerFooter');
-
-      if (checkoutView) checkoutView.style.display = 'none';
-      if (successView) successView.style.display = 'none';
-      if (itemsContainer) itemsContainer.style.display = 'block';
-      if (footer && this.items.length > 0) footer.style.display = 'block';
-      this.renderDrawer();
-    },
-
     // --- Order Checkout via WhatsApp: Redirects with full cart products ---
     checkoutViaWhatsApp() {
       if (this.items.length === 0) {
@@ -608,7 +423,7 @@
         return;
       }
 
-      const { subtotal, deliveryFee, grandTotal } = this.getTotals();
+      const { itemCount, subtotal } = this.getTotals();
       const user = window.CustomerAuth ? window.CustomerAuth.getCurrentUser() : null;
 
       let lines = [
@@ -618,6 +433,7 @@
 
       if (user && user.name) {
         lines.push(`*Customer:* ${user.name} (${user.phone})`);
+        if (user.city) lines.push(`*Location:* ${user.city}`);
         lines.push('--------------------------------------------');
       }
 
@@ -627,98 +443,14 @@
       });
 
       lines.push('--------------------------------------------');
-      lines.push(`*Subtotal:* ₹${subtotal}`);
-      lines.push(`*Delivery:* ${deliveryFee === 0 ? 'FREE (Above ₹499 promo)' : '₹' + deliveryFee}`);
-      lines.push(`*Total Amount:* ₹${grandTotal}`);
+      lines.push(`*Total Items:* ${itemCount} pack(s)`);
+      lines.push(`*Estimated Order Value:* ₹${subtotal}`);
       lines.push('--------------------------------------------');
-      lines.push('Please confirm availability and share payment / dispatch details. Thank you!');
+      lines.push('Please confirm availability and share payment / order dispatch details. Thank you!');
 
       const encoded = encodeURIComponent(lines.join('\n'));
       const waURL = `https://wa.me/916372585804?text=${encoded}`;
       window.open(waURL, '_blank');
-    },
-
-    // --- Direct Order Placement (Saves via /api/contact) ---
-    async handleDirectOrderSubmit(e) {
-      e.preventDefault();
-      const submitBtn = document.getElementById('btnSubmitDirectOrder');
-      const originalText = submitBtn ? submitBtn.innerHTML : 'Place Order Now';
-
-      const name = document.getElementById('orderCustomerName').value.trim();
-      const phone = document.getElementById('orderCustomerPhone').value.trim();
-      const pincode = document.getElementById('orderCustomerPincode').value.trim();
-      const address = document.getElementById('orderCustomerAddress').value.trim();
-      const paymentMode = document.getElementById('orderPaymentMethod').value;
-
-      if (!name || !phone || !address || !pincode) {
-        alert('Please fill in all mandatory fields.');
-        return;
-      }
-
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Order...';
-      }
-
-      const { subtotal, deliveryFee, grandTotal } = this.getTotals();
-      const orderId = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
-
-      const itemsSummary = this.items.map(it => `${it.name} (${it.weight}) x ${it.quantity} = ₹${it.price * it.quantity}`).join(' | ');
-      const messageBody = `
-ORDER ID: ${orderId}
-TOTAL AMOUNT: ₹${grandTotal} (Subtotal: ₹${subtotal}, Delivery: ₹${deliveryFee})
-PAYMENT PREFERENCE: ${paymentMode}
-DELIVERY ADDRESS: ${address}, Pincode: ${pincode}
-ITEMS ORDERED:
-${this.items.map(it => `- ${it.name} (${it.weight}) x ${it.quantity} = ₹${it.price * it.quantity}`).join('\n')}
-      `.trim();
-
-      try {
-        await fetch('/api/contact', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name,
-            phone,
-            email: 'customer@subhadarshini.order',
-            subject: `Online Order #${orderId} - ₹${grandTotal}`,
-            inquiryType: 'Direct Online Order',
-            message: messageBody
-          })
-        });
-
-        this.showSuccessView(orderId, name, phone, grandTotal, itemsSummary);
-        this.items = [];
-        this.saveCart();
-      } catch (err) {
-        console.warn('Network issue during direct order, proceeding with local confirmation:', err);
-        this.showSuccessView(orderId, name, phone, grandTotal, itemsSummary);
-        this.items = [];
-        this.saveCart();
-      } finally {
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalText;
-        }
-      }
-    },
-
-    showSuccessView(orderId, name, phone, grandTotal, itemsSummary) {
-      const checkoutView = document.getElementById('cartCheckoutView');
-      const successView = document.getElementById('cartSuccessView');
-      const orderIdEl = document.getElementById('successOrderId');
-      const waBtn = document.getElementById('successWhatsAppBtn');
-
-      if (checkoutView) checkoutView.style.display = 'none';
-      if (successView) successView.style.display = 'block';
-      if (orderIdEl) orderIdEl.textContent = `Order Reference: ${orderId}`;
-
-      if (waBtn) {
-        const text = encodeURIComponent(
-          `Hello Subhadarshini Team, I placed an online order (${orderId}) for ₹${grandTotal}.\nCustomer: ${name} (${phone})\nItems: ${itemsSummary}\nPlease confirm my delivery schedule.`
-        );
-        waBtn.href = `https://wa.me/916372585804?text=${text}`;
-      }
     },
 
     // --- Toast Notifications ---

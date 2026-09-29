@@ -102,7 +102,7 @@ async function runTests() {
     assert(cartB.length === 1 && cartB[0].name === "Royal Meat Masala", "Client B has Royal Meat Masala");
     assert(cartB[0].name !== cartA[0].name, "Client A and Client B have completely separate, individual carts");
 
-    // 3. Test WhatsApp Order Formatter
+    // 3. Test WhatsApp Order Formatter (Exclusively via WhatsApp, no online delivery option)
     console.log("\n[Test 3] Verifying WhatsApp Checkout Message Formatting with Client Details...");
     let lines = [
       '🌿 *NEW SPICE ORDER - SUBHADARSHINI SPICES* 🌿',
@@ -115,16 +115,14 @@ async function runTests() {
       lines.push(`${index + 1}. *${item.name}* (${item.weight}) x ${item.quantity} = ₹${item.price * item.quantity}`);
     });
     const subtotal = cartA.reduce((sum, it) => sum + (it.price * it.quantity), 0);
-    const deliveryFee = subtotal >= 499 ? 0 : 40;
     lines.push('--------------------------------------------');
-    lines.push(`*Subtotal:* ₹${subtotal}`);
-    lines.push(`*Delivery:* ₹${deliveryFee}`);
-    lines.push(`*Total Amount:* ₹${subtotal + deliveryFee}`);
+    lines.push(`*Total Items:* 2 pack(s)`);
+    lines.push(`*Estimated Order Value:* ₹${subtotal}`);
     const waText = lines.join('\n');
 
     assert(waText.includes('*Customer:* Client A (9876543210)'), "WhatsApp message includes client name & mobile");
     assert(waText.includes('*Sambar Masala* (100g) x 2 = ₹144'), "WhatsApp message includes itemized products & quantity");
-    assert(waText.includes('*Subtotal:* ₹144'), "WhatsApp message includes correct subtotal");
+    assert(waText.includes('*Estimated Order Value:* ₹144'), "WhatsApp message includes correct order total without delivery fee");
 
     // 4. Test Direct Order API POST (/api/contact)
     console.log("\n[Test 4] Testing Direct Online Order submission via /api/contact...");
