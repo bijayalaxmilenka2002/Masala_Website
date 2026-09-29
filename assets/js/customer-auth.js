@@ -131,6 +131,26 @@
         localStorage.setItem(SESSION_KEY, JSON.stringify(this.currentUser));
       } catch (e) {}
 
+      // Automatically migrate any items from guest cart to customer account
+      try {
+        const guestKey = 'subhadarshini_cart_guest';
+        const userKey = `subhadarshini_cart_${account.phone}`;
+        const guestItems = JSON.parse(localStorage.getItem(guestKey) || '[]');
+        if (Array.isArray(guestItems) && guestItems.length > 0) {
+          const userItems = JSON.parse(localStorage.getItem(userKey) || '[]');
+          guestItems.forEach(gItem => {
+            const existing = userItems.find(u => u.key === gItem.key);
+            if (existing) {
+              existing.quantity += gItem.quantity;
+            } else {
+              userItems.push(gItem);
+            }
+          });
+          localStorage.setItem(userKey, JSON.stringify(userItems));
+          localStorage.removeItem(guestKey);
+        }
+      } catch (err) {}
+
       this.updateHeaderUI();
 
       // Notify CartManager that user changed so it loads their specific individual cart!
@@ -240,7 +260,7 @@
                 </div>
                 <div class="dropdown-divider"></div>
                 <a href="products.html" class="dropdown-item"><i class="fas fa-pepper-hot"></i> Browse Spices</a>
-                <button type="button" class="dropdown-item" onclick="CartManager.openCart()"><i class="fas fa-shopping-bag"></i> My Spice Basket</button>
+                <button type="button" class="dropdown-item" onclick="CartManager.openCart(event)"><i class="fas fa-shopping-bag"></i> My Spice Basket</button>
                 <div class="dropdown-divider"></div>
                 <button type="button" class="dropdown-item logout-link" onclick="CustomerAuth.logout()"><i class="fas fa-right-from-bracket"></i> Sign Out</button>
               </div>

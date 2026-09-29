@@ -283,9 +283,9 @@
       // Toast click to view cart
       const toastViewBtn = document.getElementById('toastViewCartBtn');
       if (toastViewBtn) {
-        toastViewBtn.addEventListener('click', () => {
+        toastViewBtn.addEventListener('click', (e) => {
           this.hideToast();
-          this.openCart();
+          this.openCart(e);
         });
       }
 
@@ -293,8 +293,14 @@
       document.addEventListener('click', (e) => {
         const toggleBtn = e.target.closest('.cart-nav-btn, .cart-mobile-btn, #cartToggleBtn, .open-cart-btn');
         if (toggleBtn) {
+          // If the button already has an inline onclick handler, avoid double-handling
+          const onclickAttr = toggleBtn.getAttribute('onclick');
+          if (onclickAttr && onclickAttr.includes('CartManager')) {
+            return;
+          }
           e.preventDefault();
-          this.toggleCart();
+          e.stopPropagation();
+          this.openCart(e);
         }
       });
     },
@@ -382,18 +388,32 @@
     },
 
     // --- Drawer Visibility ---
-    openCart() {
+    openCart(event) {
+      if (event) {
+        if (typeof event.preventDefault === 'function') event.preventDefault();
+        if (typeof event.stopPropagation === 'function') event.stopPropagation();
+      }
+
+      this.ensureDrawerDOM();
+      this.loadCart(); // Always reload freshest cart items
+      this.updateBadges();
+      this.renderDrawer();
+
       const drawer = document.getElementById('cartDrawer');
       const backdrop = document.getElementById('cartBackdrop');
       if (!drawer || !backdrop) return;
 
-      this.renderDrawer();
       drawer.classList.add('open');
       backdrop.classList.add('open');
       document.body.classList.add('cart-drawer-active');
     },
 
-    closeCart() {
+    closeCart(event) {
+      if (event) {
+        if (typeof event.preventDefault === 'function') event.preventDefault();
+        if (typeof event.stopPropagation === 'function') event.stopPropagation();
+      }
+
       const drawer = document.getElementById('cartDrawer');
       const backdrop = document.getElementById('cartBackdrop');
       if (!drawer || !backdrop) return;
@@ -403,11 +423,16 @@
       document.body.classList.remove('cart-drawer-active');
     },
 
-    toggleCart() {
+    toggleCart(event) {
+      if (event) {
+        if (typeof event.preventDefault === 'function') event.preventDefault();
+        if (typeof event.stopPropagation === 'function') event.stopPropagation();
+      }
+
       if (this.isCartOpen()) {
-        this.closeCart();
+        this.closeCart(event);
       } else {
-        this.openCart();
+        this.openCart(event);
       }
     },
 

@@ -43,7 +43,7 @@
       </nav>
 
       <div class="nav-actions">
-        <button class="cart-nav-btn" onclick="CartManager.openCart()" aria-label="View Shopping Basket" title="View Spice Basket">
+        <button class="cart-nav-btn" onclick="CartManager.openCart(event)" aria-label="View Shopping Basket" title="View Spice Basket">
           <i class="fas fa-shopping-bag"></i>
           <span class="cart-nav-badge" id="cartBadge">0</span>
         </button>
@@ -186,7 +186,7 @@
       <a href="tel:+916372585804" class="mobile-bar-item"><i class="fas fa-phone-alt"></i><span>Call</span></a>
       <a href="https://wa.me/916372585804" target="_blank" class="mobile-bar-item whatsapp-item"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></a>
       <a href="products.html" class="mobile-bar-item active"><i class="fas fa-pepper-hot"></i><span>Spices</span></a>
-      <button class="mobile-bar-item cart-mobile-btn" onclick="CartManager.openCart()" aria-label="View Basket">
+      <button class="mobile-bar-item cart-mobile-btn" onclick="CartManager.openCart(event)" aria-label="View Basket">
         <div class="mobile-cart-icon-wrapper">
           <i class="fas fa-shopping-bag"></i>
           <span class="mobile-cart-badge" id="mobileCartBadge">0</span>
