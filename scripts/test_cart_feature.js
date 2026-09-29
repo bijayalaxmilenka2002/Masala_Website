@@ -41,11 +41,11 @@ async function runTests() {
     assert(htmlRes.data.includes('cart-nav-btn'), "products.html includes cart-nav-btn");
     assert(htmlRes.data.includes('modal-qty-stepper'), "products.html includes modal-qty-stepper");
 
-    const cartJsRes = await fetchURL('/assets/js/cart.js?v=4.0');
+    const cartJsRes = await fetchURL('/assets/js/cart.js?v=5.0');
     assert(cartJsRes.status === 200, "assets/js/cart.js returns 200 OK");
     assert(cartJsRes.data.includes('CartManager'), "cart.js contains CartManager object");
 
-    const authJsRes = await fetchURL('/assets/js/customer-auth.js?v=4.0');
+    const authJsRes = await fetchURL('/assets/js/customer-auth.js?v=5.0');
     assert(authJsRes.status === 200, "assets/js/customer-auth.js returns 200 OK");
     assert(authJsRes.data.includes('CustomerAuth'), "customer-auth.js contains CustomerAuth object");
 
