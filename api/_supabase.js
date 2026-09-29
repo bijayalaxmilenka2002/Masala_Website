@@ -159,8 +159,11 @@ async function fetchInquiries() {
         .order('created_at', { ascending: false });
 
       if (!error && Array.isArray(data)) {
+        // Exclude internal system configuration records from customer inquiries
+        const customerRows = data.filter(item => item && !String(item.id).startsWith('SYS_'));
+        
         // Map Supabase snake_case fields to camelCase for the owner portal
-        const mapped = data.map(item => ({
+        const mapped = customerRows.map(item => ({
           id: item.id,
           receivedAt: item.received_at || item.created_at,
           name: item.name,
@@ -343,6 +346,77 @@ async function checkSupabaseHealth() {
   }
 }
 
+/**
+ * Retrieve persistent Owner Credentials from Supabase
+ */
+async function getCloudCredentials() {
+  const client = getSupabaseClient();
+  if (client) {
+    try {
+      const { data, error } = await client
+        .from('inquiries')
+        .select('*')
+        .eq('id', 'SYS_OWNER_CONFIG')
+        .maybeSingle();
+
+      if (!error && data && data.message) {
+        const parsed = JSON.parse(data.message);
+        if (parsed && parsed.username && parsed.password) {
+          return {
+            username: String(parsed.username).trim(),
+            password: String(parsed.password).trim(),
+            updatedAt: parsed.updatedAt
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('[SUPABASE CREDENTIALS FETCH WARNING]:', e.message);
+    }
+  }
+  return null;
+}
+
+/**
+ * Persist Owner Credentials to Supabase Cloud Database
+ */
+async function saveCloudCredentials(username, password) {
+  const client = getSupabaseClient();
+  const config = {
+    username: String(username).trim(),
+    password: String(password).trim(),
+    updatedAt: new Date().toISOString()
+  };
+
+  if (client) {
+    try {
+      const row = {
+        id: 'SYS_OWNER_CONFIG',
+        name: config.username,
+        phone: 'SYSTEM_CONFIG',
+        email: 'system@subhadarshini.internal',
+        inquiry_type: 'System Settings',
+        subject: 'Owner Credentials Config',
+        message: JSON.stringify(config),
+        status: 'Resolved',
+        notes: 'Protected system credentials record',
+        source: 'System'
+      };
+
+      const { data, error } = await client
+        .from('inquiries')
+        .upsert(row, { onConflict: 'id' })
+        .select();
+
+      if (!error) {
+        return { success: true, storage: 'supabase', config };
+      }
+    } catch (e) {
+      console.warn('[SUPABASE CREDENTIALS SAVE WARNING]:', e.message);
+    }
+  }
+  return { success: false, storage: 'local', config };
+}
+
 module.exports = {
   isSupabaseConfigured,
   getSupabaseClient,
@@ -350,5 +424,7 @@ module.exports = {
   fetchInquiries,
   updateInquiry,
   deleteInquiry,
-  checkSupabaseHealth
+  checkSupabaseHealth,
+  getCloudCredentials,
+  saveCloudCredentials
 };

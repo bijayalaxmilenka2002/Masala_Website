@@ -45,7 +45,12 @@ if (!fs.existsSync(CONFIG_FILE)) {
   }, null, 2), 'utf8');
 }
 
-function getOwnerCredentials() {
+async function getOwnerCredentials() {
+  try {
+    const cloud = await supabaseService.getCloudCredentials();
+    if (cloud && cloud.username && cloud.password) return cloud;
+  } catch (e) {}
+
   try {
     if (fs.existsSync(CONFIG_FILE)) {
       const data = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
@@ -62,12 +67,15 @@ function getOwnerCredentials() {
   };
 }
 
-function saveOwnerCredentials(username, password) {
+async function saveOwnerCredentials(username, password) {
   const config = {
     username: String(username).trim(),
     password: String(password).trim(),
     updatedAt: new Date().toISOString()
   };
+  try {
+    await supabaseService.saveCloudCredentials(config.username, config.password);
+  } catch (e) {}
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf8');
   return config;
 }
@@ -192,7 +200,7 @@ const server = http.createServer(async (req, res) => {
     try {
       const raw = await readBody(req);
       const { username, password } = JSON.parse(raw);
-      const currentCreds = getOwnerCredentials();
+      const currentCreds = await getOwnerCredentials();
 
       if (username === currentCreds.username && password === currentCreds.password) {
         const sessionToken = generateAuthToken(currentCreds.username);
@@ -228,7 +236,7 @@ const server = http.createServer(async (req, res) => {
     try {
       const raw = await readBody(req);
       const { currentPassword, newUsername, newPassword } = JSON.parse(raw);
-      const currentCreds = getOwnerCredentials();
+      const currentCreds = await getOwnerCredentials();
 
       if (currentPassword !== currentCreds.password) {
         return sendJSON(res, 400, {
@@ -251,7 +259,7 @@ const server = http.createServer(async (req, res) => {
         });
       }
 
-      saveOwnerCredentials(newUsername, newPassword);
+      await saveOwnerCredentials(newUsername, newPassword);
       console.log(`[CREDENTIALS UPDATED] Owner username updated to: "${newUsername}"`);
 
       return sendJSON(res, 200, {

@@ -181,8 +181,11 @@ function initProductCatalog() {
                 <button class="btn btn-secondary btn-sm btn-card-details" onclick="openProductModal('${product.id}')" title="Quick View & Details">
                   <i class="fas fa-eye"></i> Details
                 </button>
-                <a href="https://wa.me/916372585804?text=${waText}" target="_blank" class="btn btn-whatsapp btn-sm btn-card-order" title="Order on WhatsApp">
-                  <i class="fab fa-whatsapp"></i> Order
+                <button class="btn btn-primary btn-sm btn-card-add" onclick="handleCardAddToCart('${product.id}', event)" title="Add to Basket">
+                  <i class="fas fa-cart-plus"></i> Add
+                </button>
+                <a href="https://wa.me/916372585804?text=${waText}" target="_blank" class="btn btn-whatsapp-icon-sm btn-card-order" title="Order on WhatsApp">
+                  <i class="fab fa-whatsapp"></i>
                 </a>
               </div>
             </div>
@@ -381,6 +384,39 @@ window.openProductModal = function(productId, initialVariantIndex) {
 
   updateModalPricingAndLink();
 
+  // Wire up Quantity Stepper & Add to Basket in Modal
+  const qtyInput = document.getElementById('modalQtyInput');
+  const qtyMinus = document.getElementById('modalQtyMinus');
+  const qtyPlus = document.getElementById('modalQtyPlus');
+  const modalAddToCartBtn = document.getElementById('modalAddToCartBtn');
+
+  if (qtyInput) qtyInput.value = '1';
+
+  if (qtyMinus) {
+    qtyMinus.onclick = () => {
+      let val = parseInt(qtyInput.value, 10) || 1;
+      if (val > 1) qtyInput.value = val - 1;
+    };
+  }
+
+  if (qtyPlus) {
+    qtyPlus.onclick = () => {
+      let val = parseInt(qtyInput.value, 10) || 1;
+      if (val < 50) qtyInput.value = val + 1;
+    };
+  }
+
+  if (modalAddToCartBtn) {
+    modalAddToCartBtn.onclick = () => {
+      const qty = parseInt(qtyInput ? qtyInput.value : 1, 10) || 1;
+      const vIndex = variants.indexOf(selectedVariant);
+      if (window.CartManager) {
+        window.CartManager.addItem(product.id, vIndex >= 0 ? vIndex : 0, qty, { openDrawer: true });
+        closeProductModal();
+      }
+    };
+  }
+
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
 };
@@ -389,7 +425,9 @@ window.closeProductModal = function() {
   const modal = document.getElementById('productModal');
   if (!modal) return;
   modal.classList.remove('open');
-  document.body.style.overflow = '';
+  if (!document.body.classList.contains('cart-drawer-active')) {
+    document.body.style.overflow = '';
+  }
 };
 
 // --- Contact Form Submission to Backend (Supabase Cloud Persistence) ---

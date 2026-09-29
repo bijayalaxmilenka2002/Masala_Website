@@ -27,6 +27,15 @@ try {
 } catch (e) {}
 
 async function getOwnerCredentials() {
+  // 1. Check persistent Supabase Cloud Database first (survives Vercel serverless teardowns & redeployments)
+  try {
+    const cloudCreds = await supabaseService.getCloudCredentials();
+    if (cloudCreds && cloudCreds.username && cloudCreds.password) {
+      return cloudCreds;
+    }
+  } catch (e) {}
+
+  // 2. Check local file backup
   try {
     if (fs.existsSync(CONFIG_FILE)) {
       const data = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
@@ -39,6 +48,7 @@ async function getOwnerCredentials() {
     }
   } catch (e) {}
 
+  // 3. Fallback to environment variables
   return {
     username: process.env.OWNER_USER || 'admin',
     password: process.env.OWNER_PASS || 'Subhadarshini@2026'
@@ -52,6 +62,12 @@ async function saveOwnerCredentials(username, password) {
     updatedAt: new Date().toISOString()
   };
 
+  // 1. Persist directly to Supabase Cloud Database (shared across all serverless lambda containers)
+  try {
+    await supabaseService.saveCloudCredentials(config.username, config.password);
+  } catch (e) {}
+
+  // 2. Mirror to local config backup
   try {
     fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf8');
   } catch (e) {}

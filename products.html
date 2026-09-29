@@ -43,6 +43,10 @@
       </nav>
 
       <div class="nav-actions">
+        <button class="cart-nav-btn" onclick="CartManager.openCart()" aria-label="View Shopping Basket" title="View Spice Basket">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="cart-nav-badge" id="cartBadge">0</span>
+        </button>
         <a href="https://wa.me/916372585804?text=Hello%20Subhadarshini%20Spices%2C%20I%20would%20like%20to%20order%20spices." target="_blank" class="btn btn-whatsapp btn-sm">
           <i class="fab fa-whatsapp"></i> Order on WhatsApp
         </a>
@@ -182,6 +186,13 @@
       <a href="tel:+916372585804" class="mobile-bar-item"><i class="fas fa-phone-alt"></i><span>Call</span></a>
       <a href="https://wa.me/916372585804" target="_blank" class="mobile-bar-item whatsapp-item"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></a>
       <a href="products.html" class="mobile-bar-item active"><i class="fas fa-pepper-hot"></i><span>Spices</span></a>
+      <button class="mobile-bar-item cart-mobile-btn" onclick="CartManager.openCart()" aria-label="View Basket">
+        <div class="mobile-cart-icon-wrapper">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="mobile-cart-badge" id="mobileCartBadge">0</span>
+        </div>
+        <span>Basket</span>
+      </button>
       <a href="recipes.html" class="mobile-bar-item"><i class="fas fa-book-open"></i><span>Recipes</span></a>
     </div>
   </div>
@@ -227,10 +238,17 @@
           </div>
 
           <div class="modal-action-bar">
+            <div class="modal-qty-stepper">
+              <button type="button" class="modal-qty-btn" id="modalQtyMinus" aria-label="Decrease">&minus;</button>
+              <input type="number" id="modalQtyInput" class="modal-qty-input" value="1" min="1" max="50" readonly>
+              <button type="button" class="modal-qty-btn" id="modalQtyPlus" aria-label="Increase">&plus;</button>
+            </div>
+            <button type="button" class="btn btn-primary btn-modal-cart" id="modalAddToCartBtn">
+              <i class="fas fa-cart-plus"></i> Add to Basket
+            </button>
             <a href="#" target="_blank" id="modalWhatsAppBtn" class="btn btn-whatsapp" style="flex:1;">
-              <i class="fab fa-whatsapp"></i> Enquire / Order on WhatsApp
+              <i class="fab fa-whatsapp"></i> Buy on WhatsApp
             </a>
-            <button class="btn btn-secondary" onclick="closeProductModal()">Close</button>
           </div>
         </div>
       </div>
@@ -238,6 +256,7 @@
   </div>
 
   <script src="assets/js/products-data.js?v=4.0"></script>
+  <script src="assets/js/cart.js?v=4.0"></script>
   <script src="assets/js/main.js?v=4.0"></script>
 </body>
 </html>
