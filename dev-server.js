@@ -453,7 +453,7 @@ const server = http.createServer(async (req, res) => {
         <body>
           <h1>404 - Page Not Found</h1>
           <p>The requested URL <code>${pathname}</code> does not exist.</p>
-          <a href="/" style="color:#D9531E;font-weight:bold;">Return to Home</a>
+          <a href="/" style="color:#E32042;font-weight:bold;">Return to Home</a>
         </body>
         </html>
       `);

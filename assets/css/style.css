@@ -6,15 +6,15 @@
 
 /* --- CSS Variables & Design Tokens --- */
 :root {
-  /* Brand Palette */
-  --primary: #D9531E;           /* Deep Royal Saffron / Paprika */
-  --primary-dark: #B33D10;      /* Dark Roasted Saffron */
-  --primary-light: #FF7034;     /* Vibrant Saffron */
-  --primary-soft: rgba(217, 83, 30, 0.08);
+  /* Brand Palette - Harmonized with Subhadarshini Logo */
+  --primary: #E32042;           /* Subhadarshini Signature Spice Crimson (Exact Logo Match) */
+  --primary-dark: #C21332;      /* Deep Roasted Crimson */
+  --primary-light: #FF385C;     /* Vibrant Spice Carmine */
+  --primary-soft: rgba(227, 32, 66, 0.08);
   
-  --secondary: #E69500;         /* Golden Turmeric */
-  --secondary-light: #FFB326;
-  --secondary-soft: rgba(230, 149, 0, 0.12);
+  --secondary: #C89F23;         /* Golden Turmeric Ochre (Exact Logo Flourish Match) */
+  --secondary-light: #DE9F28;
+  --secondary-soft: rgba(200, 159, 35, 0.12);
 
   --accent-green: #1E5936;      /* Cardamom Leaf Green */
   --accent-green-soft: rgba(30, 89, 54, 0.1);
@@ -42,7 +42,7 @@
   --shadow-md: 0 6px 20px rgba(20, 17, 14, 0.08);
   --shadow-lg: 0 14px 36px rgba(20, 17, 14, 0.12);
   --shadow-xl: 0 24px 50px rgba(20, 17, 14, 0.16);
-  --shadow-glow: 0 10px 30px rgba(217, 83, 30, 0.25);
+  --shadow-glow: 0 10px 30px rgba(227, 32, 66, 0.22);
 
   /* Transitions */
   --ease: cubic-bezier(0.25, 1, 0.5, 1);
@@ -169,15 +169,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary) 0%, #E6632B 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, #FF385C 100%);
   color: var(--white);
-  box-shadow: 0 4px 15px rgba(217, 83, 30, 0.3);
+  box-shadow: 0 4px 15px rgba(227, 32, 66, 0.28);
 }
 
 .btn-primary:hover {
   background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(217, 83, 30, 0.4);
+  box-shadow: 0 8px 24px rgba(227, 32, 66, 0.38);
   color: var(--white);
 }
 
@@ -255,12 +255,18 @@ h1, h2, h3, h4, h5, h6 {
   top: 0;
   left: 0;
   width: 100%;
-  background: rgba(253, 251, 247, 0.92);
+  background: rgba(253, 251, 247, 0.94);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(216, 210, 201, 0.5);
   z-index: 1000;
   transition: var(--transition);
+}
+
+.site-header .container {
+  max-width: 1440px;
+  padding-left: clamp(1rem, 2.5vw, 2.5rem);
+  padding-right: clamp(1rem, 2.5vw, 2.5rem);
 }
 
 .site-header.scrolled {
@@ -271,35 +277,47 @@ h1, h2, h3, h4, h5, h6 {
 .nav-container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   height: var(--header-height);
+  width: 100%;
 }
 
 .logo-link {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-shrink: 0;
+  margin-right: clamp(1.5rem, 2.8vw, 3.25rem); /* Generous, clear breathing space from Home */
+  text-decoration: none;
 }
 
 .logo-img {
-  height: 52px;
+  height: 48px;
   width: auto;
   object-fit: contain;
+  transition: transform 0.25s ease;
+}
+
+.logo-link:hover .logo-img {
+  transform: scale(1.02);
 }
 
 .nav-menu {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: clamp(0.75rem, 1.25vw, 1.45rem); /* Breathable proportional gap */
+  flex-shrink: 1;
 }
 
 .nav-link {
   font-family: var(--font-heading);
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   color: var(--dark-700);
   position: relative;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0.25rem;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+  transition: var(--transition);
 }
 
 .nav-link::after {
@@ -308,7 +326,7 @@ h1, h2, h3, h4, h5, h6 {
   bottom: 0;
   left: 0;
   width: 0;
-  height: 2px;
+  height: 2.5px;
   background: var(--primary);
   border-radius: var(--radius-full);
   transition: var(--transition);
@@ -323,9 +341,20 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-actions {
+  margin-left: auto; /* Pushes action buttons cleanly to far right */
+  padding-left: clamp(1rem, 2vw, 2.25rem); /* Minimum safety buffer separating Contact and Bijayalaxmi */
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.nav-actions .btn-whatsapp {
+  padding: 0.48rem 1.15rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: var(--radius-full);
 }
 
 /* Mobile Toggle Hamburger */
@@ -466,7 +495,7 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   padding: 3rem 0 5rem;
   background: radial-gradient(circle at 80% 20%, rgba(245, 166, 35, 0.15) 0%, transparent 50%),
-              radial-gradient(circle at 10% 80%, rgba(217, 83, 30, 0.08) 0%, transparent 40%),
+              radial-gradient(circle at 10% 80%, rgba(227, 32, 66, 0.08) 0%, transparent 40%),
               var(--light-parchment);
   overflow: hidden;
 }
@@ -565,7 +594,7 @@ h1, h2, h3, h4, h5, h6 {
   position: absolute;
   width: 80%;
   height: 80%;
-  background: radial-gradient(circle, rgba(217, 83, 30, 0.3) 0%, rgba(230, 149, 0, 0.15) 50%, transparent 70%);
+  background: radial-gradient(circle, rgba(227, 32, 66, 0.3) 0%, rgba(230, 149, 0, 0.15) 50%, transparent 70%);
   filter: blur(40px);
   z-index: 1;
 }
@@ -731,7 +760,7 @@ h1, h2, h3, h4, h5, h6 {
 .cat-tab-btn.active {
   background: var(--primary);
   color: var(--white);
-  box-shadow: 0 4px 12px rgba(217, 83, 30, 0.25);
+  box-shadow: 0 4px 12px rgba(227, 32, 66, 0.25);
 }
 
 /* Live Search Toolbar */
@@ -810,7 +839,7 @@ h1, h2, h3, h4, h5, h6 {
 .product-card:hover {
   transform: translateY(-6px);
   box-shadow: var(--shadow-lg);
-  border-color: rgba(217, 83, 30, 0.3);
+  border-color: rgba(227, 32, 66, 0.3);
 }
 
 .product-thumb-box {
@@ -1885,22 +1914,49 @@ textarea.form-control {
   }
 }
 
-@media (min-width: 769px) and (max-width: 1120px) {
+@media (min-width: 993px) and (max-width: 1250px) {
+  .logo-link {
+    margin-right: 1.25rem;
+  }
   .nav-menu {
-    gap: 1.1rem;
+    gap: clamp(0.55rem, 0.9vw, 1rem);
   }
   .nav-link {
-    font-size: 0.88rem;
+    font-size: 0.86rem;
+    padding: 0.4rem 0.15rem;
   }
   .nav-actions {
-    gap: 0.5rem;
-    flex-shrink: 0;
+    gap: 0.55rem;
+    padding-left: 0.85rem;
   }
   .nav-actions .btn-whatsapp {
-    padding: 0.45rem 0.85rem;
+    padding: 0.42rem 0.85rem;
     font-size: 0.82rem;
     white-space: nowrap;
-    flex-shrink: 0;
+  }
+  .btn-user-chip {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 992px) {
+  :root {
+    --header-height: 72px;
+  }
+
+  .nav-menu, .nav-actions .btn-whatsapp, .nav-actions .btn-primary {
+    display: none;
+  }
+
+  .mobile-toggle {
+    display: flex;
+  }
+
+  .nav-actions {
+    margin-left: auto;
+    padding-left: 0;
+    gap: 0.65rem;
   }
 }
 
@@ -1911,14 +1967,6 @@ textarea.form-control {
 
   .top-bar {
     display: none;
-  }
-
-  .nav-menu, .nav-actions .btn-primary {
-    display: none;
-  }
-
-  .mobile-toggle {
-    display: flex;
   }
 
   .contact-card {
@@ -2046,7 +2094,7 @@ textarea.form-control {
   border-color: var(--primary);
   color: var(--primary);
   transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(217, 83, 30, 0.18);
+  box-shadow: 0 4px 14px rgba(227, 32, 66, 0.18);
 }
 
 .cart-nav-badge {
@@ -2066,7 +2114,7 @@ textarea.form-control {
   padding: 0 4px;
   line-height: 1;
   border: 2px solid var(--white);
-  box-shadow: 0 2px 6px rgba(217, 83, 30, 0.35);
+  box-shadow: 0 2px 6px rgba(227, 32, 66, 0.35);
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -2111,12 +2159,12 @@ textarea.form-control {
   color: var(--white) !important;
   border: none !important;
   font-weight: 700 !important;
-  box-shadow: 0 3px 10px rgba(217, 83, 30, 0.3) !important;
+  box-shadow: 0 3px 10px rgba(227, 32, 66, 0.3) !important;
 }
 
 .btn-card-add:hover {
   background: var(--primary-dark) !important;
-  box-shadow: 0 5px 14px rgba(217, 83, 30, 0.45) !important;
+  box-shadow: 0 5px 14px rgba(227, 32, 66, 0.45) !important;
   transform: translateY(-2px);
 }
 
@@ -2358,7 +2406,7 @@ body.cart-drawer-active {
 }
 
 .cart-item-card:hover {
-  border-color: rgba(217, 83, 30, 0.35);
+  border-color: rgba(227, 32, 66, 0.35);
   box-shadow: var(--shadow-sm);
 }
 
@@ -2577,7 +2625,7 @@ body.cart-drawer-active {
 .form-group-sm textarea:focus,
 .form-group-sm select:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(217, 83, 30, 0.12);
+  box-shadow: 0 0 0 3px rgba(227, 32, 66, 0.12);
 }
 
 .form-row-sm {
@@ -2842,7 +2890,7 @@ body.cart-drawer-active {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(217, 83, 30, 0.25);
+  background: rgba(227, 32, 66, 0.25);
   color: var(--primary-light);
   display: flex;
   align-items: center;
@@ -3044,8 +3092,8 @@ body.cart-drawer-active {
    ========================================================================== */
 .spice-box-section {
   background: linear-gradient(135deg, #FFF8F3 0%, #FFFDF9 100%);
-  border-top: 1px solid rgba(217, 83, 30, 0.12);
-  border-bottom: 1px solid rgba(217, 83, 30, 0.12);
+  border-top: 1px solid rgba(227, 32, 66, 0.12);
+  border-bottom: 1px solid rgba(227, 32, 66, 0.12);
   position: relative;
   overflow: hidden;
 }
@@ -3159,7 +3207,7 @@ body.cart-drawer-active {
 .box-preview-container {
   background: var(--white);
   border-radius: var(--radius-lg);
-  border: 2px dashed rgba(217, 83, 30, 0.4);
+  border: 2px dashed rgba(227, 32, 66, 0.4);
   padding: 2.2rem 1.8rem;
   box-shadow: var(--shadow-lg);
   position: sticky;
@@ -3306,7 +3354,7 @@ body.cart-drawer-active {
   background: var(--primary);
   color: var(--white);
   border-color: var(--primary);
-  box-shadow: 0 4px 12px rgba(217, 83, 30, 0.3);
+  box-shadow: 0 4px 12px rgba(227, 32, 66, 0.3);
 }
 
 .odia-subhead {
@@ -3400,19 +3448,26 @@ button.variant-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  background: var(--light-parchment);
-  border: 1.5px solid var(--primary);
-  color: var(--primary-dark);
+  background: var(--primary-soft);
+  border: 1.2px solid rgba(227, 32, 66, 0.28);
+  color: var(--primary);
   border-radius: var(--radius-full);
-  padding: 0.4rem 0.85rem;
+  padding: 0.42rem 0.9rem;
   font-size: 0.84rem;
   font-weight: 700;
   cursor: pointer;
   transition: var(--transition);
+  white-space: nowrap;
+}
+
+.btn-user-chip:hover {
+  background: rgba(227, 32, 66, 0.14);
+  border-color: var(--primary);
+  transform: translateY(-1px);
 }
 
 .btn-user-chip i.fa-circle-user {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: var(--primary);
 }
 

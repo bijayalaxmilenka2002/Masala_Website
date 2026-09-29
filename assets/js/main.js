@@ -600,7 +600,7 @@ function showToast(message) {
       font-size: 0.92rem;
       font-weight: 500;
       box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      border-left: 4px solid #D9531E;
+      border-left: 4px solid #E32042;
       z-index: 9999;
       transform: translateY(100px);
       opacity: 0;

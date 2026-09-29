@@ -11,7 +11,7 @@
     :root {
       --portal-dark: #181512;
       --portal-surface: #221D18;
-      --portal-accent: #D9531E;
+      --portal-accent: #E32042;
       --portal-gold: #E69500;
       --portal-bg: #F8F6F2;
       --portal-card: #FFFFFF;
@@ -124,7 +124,7 @@
       width: 52px;
       height: 52px;
       border-radius: 12px;
-      background: rgba(217, 83, 30, 0.1);
+      background: rgba(227, 32, 66, 0.1);
       color: var(--portal-accent);
       display: flex;
       align-items: center;
@@ -379,14 +379,14 @@
       width: 48px;
       height: 48px;
       border-radius: 14px;
-      background: linear-gradient(135deg, rgba(217, 83, 30, 0.15), rgba(230, 149, 0, 0.15));
+      background: linear-gradient(135deg, rgba(227, 32, 66, 0.15), rgba(230, 149, 0, 0.15));
       color: var(--portal-accent);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1.35rem;
       flex-shrink: 0;
-      border: 1px solid rgba(217, 83, 30, 0.25);
+      border: 1px solid rgba(227, 32, 66, 0.25);
     }
     .cred-header-text h4 {
       margin: 0 0 0.25rem;
@@ -443,7 +443,7 @@
     .cred-input:focus {
       background: #FFFFFF;
       border-color: var(--portal-accent);
-      box-shadow: 0 0 0 3px rgba(217, 83, 30, 0.15);
+      box-shadow: 0 0 0 3px rgba(227, 32, 66, 0.15);
     }
     .cred-input::placeholder {
       color: #A89F95;
@@ -651,7 +651,7 @@
     <div class="portal-modal-card" style="max-width: 480px; padding: 2rem; border-radius: 20px;">
       <button type="button" class="modal-close-btn" onclick="closeNoteModal()">&times;</button>
       <div style="display:flex; align-items:center; gap:0.85rem; margin-bottom:1.25rem;">
-        <div style="width:44px; height:44px; border-radius:12px; background:rgba(217,83,30,0.12); color:var(--portal-accent); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+        <div style="width:44px; height:44px; border-radius:12px; background:rgba(227,32,66,0.12); color:var(--portal-accent); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
           <i class="fas fa-sticky-note"></i>
         </div>
         <div>
@@ -758,7 +758,7 @@
           <button type="button" onclick="closeCredentialsModal()" class="btn btn-secondary" style="padding:0.65rem 1.4rem; font-weight:600; cursor:pointer;">
             Cancel
           </button>
-          <button type="submit" id="saveCredsBtn" class="btn btn-primary" style="background:linear-gradient(135deg, #D9531E, #C2410C); border-color:#D9531E; padding:0.65rem 1.5rem; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(217,83,30,0.3);">
+          <button type="submit" id="saveCredsBtn" class="btn btn-primary" style="background:linear-gradient(135deg, #E32042, #C2410C); border-color:#E32042; padding:0.65rem 1.5rem; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(227,32,66,0.3);">
             <i class="fas fa-check"></i> Update Credentials
           </button>
         </div>
@@ -1272,8 +1272,8 @@
   <style>
     @page { size: A4 portrait; margin: 12mm 15mm; }
     body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #181512; margin: 0; padding: 20px; font-size: 11pt; line-height: 1.4; }
-    .report-header { border-bottom: 3px solid #D9531E; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-start; }
-    .brand-title { font-size: 18pt; font-weight: 800; color: #D9531E; margin: 0 0 3px; letter-spacing: -0.02em; }
+    .report-header { border-bottom: 3px solid #E32042; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .brand-title { font-size: 18pt; font-weight: 800; color: #E32042; margin: 0 0 3px; letter-spacing: -0.02em; }
     .brand-sub { font-size: 8.5pt; color: #574F47; margin: 0; line-height: 1.4; }
     .meta-box { text-align: right; font-size: 8.5pt; color: #786E64; }
     .meta-box strong { color: #181512; }
@@ -1298,7 +1298,7 @@
     .badge-deleted { background: #F3F4F6; color: #4B5563; text-decoration: line-through; }
 
     .no-print-toolbar { position: fixed; top: 12px; right: 16px; display: flex; gap: 8px; background: #fff; padding: 8px 12px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 1px solid #ddd; z-index: 1000; }
-    .btn-print { background: #D9531E; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 9pt; }
+    .btn-print { background: #E32042; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 9pt; }
     .btn-close { background: #6B7280; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 9pt; }
 
     @media print {
