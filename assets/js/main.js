@@ -452,8 +452,10 @@ window.openProductModal = function(productId, initialVariantIndex) {
       const qty = parseInt(qtyInput ? qtyInput.value : 1, 10) || 1;
       const vIndex = variants.indexOf(selectedVariant);
       if (window.CartManager) {
-        window.CartManager.addItem(product.id, vIndex >= 0 ? vIndex : 0, qty, { openDrawer: true });
-        closeProductModal();
+        const added = window.CartManager.addItem(product.id, vIndex >= 0 ? vIndex : 0, qty, { openDrawer: false });
+        if (added) {
+          closeProductModal();
+        }
       }
     };
   }

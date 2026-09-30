@@ -220,7 +220,7 @@
           const action = JSON.parse(stored);
           if (action && action.productId && window.CartManager) {
             setTimeout(() => {
-              window.CartManager.addItem(action.productId, action.variantIndex || 0, action.quantity || 1, { openDrawer: true });
+              window.CartManager.addItem(action.productId, action.variantIndex || 0, action.quantity || 1, { openDrawer: false });
             }, 300);
           }
         }

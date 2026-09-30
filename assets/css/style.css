@@ -2192,9 +2192,11 @@ textarea.form-control {
 }
 
 .btn-added-pulse {
-  background: var(--accent-green) !important;
-  box-shadow: 0 4px 14px rgba(30, 89, 54, 0.4) !important;
-  transform: scale(1.05);
+  background: #1e5936 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(30, 89, 54, 0.45) !important;
+  transform: scale(1.04);
+  transition: all 0.25s ease-in-out;
 }
 
 /* Backdrop */

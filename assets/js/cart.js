@@ -125,8 +125,10 @@
         this.animateBadge();
       }
 
-      // Immediately slide open the cart drawer so client can see the products!
-      this.openCart();
+      // Keep user on the current page; do not auto-open cart drawer unless explicitly requested
+      if (options.openDrawer) {
+        this.openCart();
+      }
 
       return true;
     },
@@ -515,7 +517,25 @@
       variantIndex = parseInt(card.dataset.selectedVariant, 10) || 0;
     }
 
-    CartManager.addItem(productId, variantIndex, 1);
+    const added = CartManager.addItem(productId, variantIndex, 1, { openDrawer: false });
+
+    // Provide immediate interactive button feedback without opening cart or navigating away
+    if (added && event) {
+      const btn = event.currentTarget || (event.target ? event.target.closest('.btn-card-add') : null);
+      if (btn) {
+        const originalHTML = btn.innerHTML;
+        btn.classList.add('btn-added-pulse');
+        btn.innerHTML = '<i class="fas fa-check"></i> Added!';
+        setTimeout(() => {
+          btn.classList.remove('btn-added-pulse');
+          if (window.updateCardCartBadge) {
+            window.updateCardCartBadge(productId);
+          } else {
+            btn.innerHTML = originalHTML;
+          }
+        }, 1000);
+      }
+    }
   };
 
   // Initialize on DOM ready
