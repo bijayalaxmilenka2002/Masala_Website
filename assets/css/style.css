@@ -2,7 +2,7 @@
    SUBHADARSHINI SPICES - MODERN DESIGN SYSTEM & RESPONSIVE STYLES
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+/* Google Fonts are preconnected and loaded directly in HTML <head> for maximum speed & zero render-blocking */
 
 /* --- CSS Variables & Design Tokens --- */
 :root {

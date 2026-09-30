@@ -151,7 +151,7 @@ function initProductCatalog() {
         <article class="product-card" id="card-${product.id}" data-selected-variant="0">
           <div class="product-thumb-box">
             ${product.badge ? `<span class="badge-tag product-badge ${product.badge === 'Odisha Special' ? 'green' : ''}">${product.badge}</span>` : ''}
-            <img src="${product.image}" alt="${product.name}" loading="lazy">
+            <img src="${product.image}" alt="${product.name} - 100% Pure Odisha Spice by Subhadarshini" loading="lazy" decoding="async" width="280" height="280">
           </div>
           <div class="product-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.35rem;">

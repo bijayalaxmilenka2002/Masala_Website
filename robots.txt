@@ -1,0 +1,22 @@
+# robots.txt for Subhadarshini Spices (Subhadarshini Agro Pvt Ltd)
+# https://masala-website-flax.vercel.app/
+
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /products.html
+Allow: /about.html
+Allow: /recipes.html
+Allow: /team.html
+Allow: /gallery.html
+Allow: /contact.html
+Allow: /assets/
+
+# Block administrative, management & backend API paths from crawlers
+Disallow: /inquiries.html
+Disallow: /owner-login.html
+Disallow: /api/
+Disallow: /data/
+
+# Sitemap location
+Sitemap: https://masala-website-flax.vercel.app/sitemap.xml

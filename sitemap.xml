@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://masala-website-flax.vercel.app/</loc>
+    <lastmod>2026-09-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://masala-website-flax.vercel.app/assets/images/logo/logo.png</image:loc>
+      <image:title>Subhadarshini Spices - 100% Pure Odisha Masalas</image:title>
+      <image:caption>Authentic Odia &amp; Indian pure ground, blended and whole spices milled with zero contamination.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://masala-website-flax.vercel.app/products.html</loc>
+    <lastmod>2026-09-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+    <image:image>
+      <image:loc>https://masala-website-flax.vercel.app/assets/images/products/sambar-masala.png</image:loc>
+      <image:title>Subhadarshini Sambar Masala</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://masala-website-flax.vercel.app/recipes.html</loc>
+    <lastmod>2026-09-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://masala-website-flax.vercel.app/about.html</loc>
+    <lastmod>2026-09-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://masala-website-flax.vercel.app/contact.html</loc>
+    <lastmod>2026-09-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://masala-website-flax.vercel.app/team.html</loc>
+    <lastmod>2026-09-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://masala-website-flax.vercel.app/gallery.html</loc>
+    <lastmod>2026-09-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://masala-website-flax.vercel.app/login.html</loc>
+    <lastmod>2026-09-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.50</priority>
+  </url>
+</urlset>
